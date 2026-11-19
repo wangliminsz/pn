@@ -1,0 +1,42 @@
+export default {
+    message: {
+        pages: {
+            groupdoc: {
+                table: {
+                    preview: 'Preview',
+                    columns: {
+                        index: 'No.',
+                        name: 'File Name',
+                        tenantId: 'Tenant ID',
+                        groupId: 'Group ID',
+                        size: 'Size',
+                        mtime: 'Upload Time',
+                        preview: 'Action',
+                    },
+                },
+                title: 'Group Documents',
+                count: '{n} files',
+                searchPlaceholder: 'Search file name / Group ID',
+                search: 'Search',
+                group: 'Group',
+                refreshName: 'Refresh group name',
+                getName: 'Get group name',
+                groupName: 'Group Name',
+                doc: 'Document',
+                bot: 'Bot',
+                size: 'Size',
+                storedAt: 'Stored At',
+                actions: 'Actions',
+                download: 'Download',
+                previewBtn: 'Preview',
+                emptyMatch: 'No matching group documents',
+                empty: 'No group documents yet (files sent in group chat are archived here automatically)',
+                refreshed: 'Group name refreshed',
+                network: 'Cannot connect to LINE (network unreachable / proxy not enabled), cannot fetch group name',
+                denied: 'LINE connected but this bot has no permission to read group info',
+                other: 'Cannot fetch group name (permission or network limit)',
+                refreshFail: 'Refresh failed',
+            },
+        },
+    },
+};

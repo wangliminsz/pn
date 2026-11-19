@@ -1,0 +1,31 @@
+export default {
+    message: {
+        pages: {
+            payment: {
+                title: 'Renewal Payment',
+                sub: 'Pay with Omise PromptPay · Expiry is automatically extended by one year after payment',
+                loading: 'Loading…',
+                gatewayDisabled: 'Payment gateway is disabled, please contact administrator.',
+                backToWorkbench: 'Back to Workbench',
+                successTitle: 'Payment successful, renewal complete',
+                successSub: 'Extended by {days}, valid until {time}',
+                successSubDim: 'Line push quota has been restored (tenant re-enabled)',
+                failTitle: 'Payment timed out / failed',
+                failSub: 'Payment was not completed in time, this QR code has been voided',
+                regenerate: 'Regenerate Payment QR',
+                amountLabel: 'Renewal Amount',
+                unit: 'THB / {days} days',
+                timeLeft: 'Time left to pay',
+                generatingQr: 'Generating QR code…',
+                qrTip: 'Scan the PromptPay QR code with your bank app / Line Pay to complete payment',
+                waitingConfirm: 'I have transferred, waiting for confirmation…',
+                qrGenerated: 'QR code generated, please scan with your bank app',
+                createFailed: 'Failed to create',
+                createPaymentFailed: 'Failed to create payment',
+                simulateSuccess: 'Simulate payment success',
+                simulateFailed: 'Simulate failed',
+                simulateRequestFailed: 'Simulate request failed',
+            },
+        },
+    },
+};

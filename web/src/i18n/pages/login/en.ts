@@ -1,0 +1,92 @@
+// 定义内容
+export default {
+	message: {
+		pages: {
+			login: {
+				signInText: 'Welcome back!',
+				brand: {
+					title: 'proNotify',
+					tagline: 'Smarter client connections',
+					point1: 'Manage your rentals and reminder schedules in one place',
+					point2: 'Line group alerts with automatic Google Calendar sync',
+					point3: 'Multi-language support built for the Thai market',
+				},
+				subtitle: 'Sign in to manage your rental reminders',
+				label: {
+					one1: 'User name login',
+					two2: 'Mobile number',
+					two3: 'QR code sign-in',
+					changePwd: 'Change The Password',
+				},
+				link: {
+					one3: 'Third party login',
+					two4: 'Links',
+				},
+				account: {
+					accountPlaceholder1: 'Enter your email account',
+					accountPlaceholder2: 'Enter your login password',
+					accountPlaceholder3: 'Enter the verification code',
+					accountPlaceholder4: 'Please enter a new password',
+					accountPlaceholder5: 'Please enter your new password again',
+					accountBtnText: 'Sign in',
+					apply: 'Apply for Trial',
+					forgotPassword: 'Reset password',
+					signup: "Sign up",
+				},
+				mobile: {
+					placeholder1: 'Please input mobile phone number',
+					placeholder2: 'Please enter the verification code',
+					codeText: 'Get code',
+					btnText: 'Sign in',
+					msgText:
+						'Warm tip: it is recommended to use Google, Microsoft edge, version 79.0.1072.62 and above browsers, and 360 browser, please use speed mode',
+				},
+				scan: {
+					text: 'Open the mobile phone to scan and quickly log in / register',
+				},
+                validation: {
+					usernameReq: 'Username is required',
+					captchaRequired: 'Please enter the verification code',
+					refreshCaptcha: 'Click to refresh',
+					oldPasswordRequired: 'Please enter your current password',
+					newPasswordRequired: 'Please enter a new password',
+					passwordComplexity: 'Password complexity too low (must contain letters and numbers)',
+					confirmPasswordRequired: 'Please confirm your password',
+					passwordMismatch: 'Passwords do not match',
+					loginFailed: 'Login failed',
+					fillLoginInfo: 'Please fill in login information',
+					firstLoginChangePwd: 'Please change your password on first login',
+					resetPassword: 'Reset password',
+					welcomeBack: 'Welcome back',
+				},
+				resetPwd: {
+					passwordPlaceholder: 'At least 8 chars, letters and numbers',
+					password2Placeholder: 'Enter the new password again',
+					btnText: 'Reset password',
+					hint: 'The reset link is valid only once; keep the new password safe',
+					back: '← Back to login',
+					passwordRequired: 'Enter a new password',
+					passwordComplexity: 'Password must be ≥8 chars and contain letters and numbers',
+					confirmRequired: 'Enter the new password again',
+					mismatch: 'Passwords do not match',
+					success: 'Password reset, sign in with the new password',
+					failed: 'Reset failed',
+				},
+				forgotPwd: {
+					emailPlaceholder: 'Enter your login email',
+					btnText: 'Send reset link',
+					hint: 'The reset link will be sent to your email and is valid for 30 minutes',
+					back: '← Back to login',
+					emailRequired: 'Enter your login email',
+					success: 'If this email exists, a reset link has been sent',
+				},
+				footer: {
+					help: 'Help',
+					privacy: 'Privacy',
+					clause: 'Terms',
+					lang: 'Language',
+				},
+			},
+		},
+	},
+};

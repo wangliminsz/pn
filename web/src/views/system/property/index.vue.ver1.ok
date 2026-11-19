@@ -1,0 +1,1266 @@
+<template>
+	<div class="prop-page">
+		<!-- 工具栏 -->
+		<div class="toolbar">
+			<div class="left">
+				<span class="title">{{ $t('message.pages.property.toolbar.title') }}</span>
+				<span class="count">{{ $t('message.pages.property.toolbar.count', { total }) }}</span>
+			</div>
+			<div class="right">
+				<el-input v-model="keyword" class="search" clearable :placeholder="$t('message.pages.property.toolbar.searchPlaceholder')"
+					@keyup.enter="onSearch" @clear="onSearch">
+					<template #prefix><el-icon class="search-ico" @click="onSearch" :title="$t('message.pages.property.toolbar.search')"><ele-Search /></el-icon></template>
+				</el-input>
+				<el-radio-group v-model="viewMode" class="view-switch" size="default">
+					<el-radio-button value="card"><el-icon style="margin-right:4px"><ele-Grid /></el-icon>{{ $t('message.pages.property.toolbar.card') }}</el-radio-button>
+					<el-radio-button value="list"><el-icon style="margin-right:4px"><ele-Tickets /></el-icon>{{ $t('message.pages.property.toolbar.list') }}</el-radio-button>
+				</el-radio-group>
+				<el-button type="primary" @click="openAdd">
+					<el-icon style="margin-right: 4px"><ele-Plus /></el-icon>{{ $t('message.pages.property.toolbar.add') }}
+				</el-button>
+				<el-button class="soft-ai" @click="aiVisible = true">
+					<el-icon style="margin-right: 4px"><ele-MagicStick /></el-icon>{{ $t('message.pages.property.toolbar.ai') }}
+				</el-button>
+				<el-button class="soft-primary" @click="importVisible = true">
+					<el-icon style="margin-right: 4px"><ele-Upload /></el-icon>{{ $t('message.pages.property.toolbar.import') }}
+				</el-button>
+				<el-button class="soft-primary" :loading="exporting" :disabled="total === 0" @click="onExport">
+					<el-icon style="margin-right: 4px"><ele-Download /></el-icon>{{ $t('message.pages.property.toolbar.export') }}
+				</el-button>
+			</div>
+		</div>
+
+		<!-- 卡片区 -->
+		<div v-loading="loading" v-show="viewMode === 'card'" class="cards">
+			<div v-if="!loading && list.length === 0" class="empty">
+				{{ keyword ? $t('message.pages.property.empty.noMatch') : $t('message.pages.property.empty.noData') }}
+			</div>
+			<div v-for="p in list" :key="p.id" class="card">
+				<div class="card-head">
+					<span class="nm" :class="{ expired: isExpired(p) }">{{ p.name }}</span>
+					<span class="badges">
+						<span v-if="p.pay_period === 'Monthly'" class="bdg m">{{ $t('message.pages.property.period.monthly') }}</span>
+						<span v-else-if="p.pay_period === 'Quarterly'" class="bdg q">{{ $t('message.pages.property.period.quarterly') }}</span>
+						<span v-else-if="p.pay_period === 'HalfYear'" class="bdg hy">{{ $t('message.pages.property.period.halfyear') }}</span>
+						<span v-else-if="p.pay_period === 'Yearly'" class="bdg y">{{ $t('message.pages.property.period.yearly') }}</span>
+						<span v-if="p.memo" class="bdg bdg-click" @click="openEdit(p)">{{ $t('message.pages.property.card.memo') }}</span>
+						<span v-if="isExpired(p)" class="bdg exp">{{ $t('message.pages.property.card.expired') }}</span>
+					</span>
+				</div>
+				<div class="row" v-if="p.owner_name"><span class="k">{{ $t('message.pages.property.card.owner') }}</span><span class="v">{{ p.owner_name }}</span></div>
+				
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.rent') }}</span><span class="v" v-if="p.rent_amount">฿{{ fmtMoney(p.rent_amount) }}</span></div>
+				
+				<div class="row divider"></div>
+
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.lease') }}</span><span class="v">{{ p.rent_start || '—' }} ~ {{ p.rent_end || '—' }}</span></div>
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.remind') }}</span><span class="v">{{ $t('message.pages.property.card.remindDay', { period: periodLabel(p.pay_period), day: p.remind_day }) }}</span></div>
+				
+				<div class="row divider"></div>
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.lineBot') }}</span><span class="v tail">{{ p.line_bot_name || '—' }}</span></div>
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.groupId') }}</span><span class="v tail gid" :title="p.group_id">{{ p.group_id || '—' }}</span></div>
+				<div class="row divider"></div>
+
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.memo') }}</span><span class="v memo" :title="p.memo">{{ shortMemo(p.memo) }}</span></div>
+				
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.attachments') }}</span><span class="v">
+					<el-button link type="primary" size="small" @click="openAtt(p)">📎 {{ $t('message.pages.property.card.attachmentsCount', { n: p.attachments_count || 0 }) }}</el-button>
+				</span></div>
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.rules') }}</span><span class="v">
+					<el-button link type="primary" size="small" @click="openRules(p)">📌 {{ $t('message.pages.property.card.rulesCount', { n: p.reminder_rules_count || 0 }) }}</el-button>
+				</span></div>
+				<div class="card-foot">
+					<span class="updated">{{ $t('message.pages.property.card.updatedAt', { time: fmtTime(p.update_datetime) }) }}</span>
+					<span class="acts">
+						<el-button link size="small" @click="openOwnerLogs(p)">{{ $t('message.pages.property.card.ownerLogs') }}</el-button>
+						<el-button link type="primary" size="small" @click="openEdit(p)">{{ $t('message.pages.property.card.edit') }}</el-button>
+						<el-button link type="danger" size="small" @click="onDelete(p)">{{ $t('message.pages.property.card.delete') }}</el-button>
+					</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- 列表视图(表格) -->
+		<div v-loading="loading" v-show="viewMode === 'list'" class="list-wrap">
+			<el-table :data="list" size="default" stripe :header-cell-style="listHeaderStyle"
+				:row-class-name="() => ''" @row-click="rowClick" @sort-change="onSortChange" class="prop-table">
+				<el-table-column :label="$t('message.pages.property.table.roomName')" prop="name" min-width="170" sortable="custom">
+					<template #default="{ row }">
+					<span class="lt-name" :class="{ expired: isExpired(row) }">{{ row.name }}</span>
+					<span v-if="row.pay_period === 'Monthly'" class="lt-bdg m">{{ $t('message.pages.property.period.monthly') }}</span>
+					<span v-else-if="row.pay_period === 'Quarterly'" class="lt-bdg q">{{ $t('message.pages.property.period.quarterly') }}</span>
+					<span v-else-if="row.pay_period === 'HalfYear'" class="lt-bdg hy">{{ $t('message.pages.property.period.halfyear') }}</span>
+					<span v-else-if="row.pay_period === 'Yearly'" class="lt-bdg y">{{ $t('message.pages.property.period.yearly') }}</span>
+					<span v-if="isExpired(row)" class="lt-bdg exp">{{ $t('message.pages.property.card.expired') }}</span>
+					</template>
+				</el-table-column>
+				<el-table-column :label="$t('message.pages.property.table.owner')" prop="owner_name" min-width="100">
+					<template #default="{ row }">{{ row.owner_name || '—' }}</template>
+				</el-table-column>
+				<el-table-column :label="$t('message.pages.property.table.lease')" prop="rent_end" min-width="180" sortable="custom">
+					<template #default="{ row }">
+						<span class="lt-muted">{{ row.rent_start || '—' }} ~ {{ row.rent_end || '—' }}</span>
+					</template>
+				</el-table-column>
+				<el-table-column :label="$t('message.pages.property.table.remind')" min-width="84">
+					<template #default="{ row }">{{ periodLabel(row.pay_period) }} {{ row.remind_day }}{{ $t('message.pages.property.day') }}</template>
+				</el-table-column>
+				<el-table-column :label="$t('message.pages.property.table.lineBot')" prop="line_bot" min-width="110" sortable="custom">
+					<template #default="{ row }">{{ row.line_bot_name || '—' }}</template>
+				</el-table-column>
+				<el-table-column :label="$t('message.pages.property.table.groupId')" min-width="210">
+					<template #default="{ row }">
+						<span class="lt-gid" :title="row.group_id">{{ row.group_id || '—' }}</span>
+					</template>
+				</el-table-column>
+				<el-table-column :label="$t('message.pages.property.table.attachments')" min-width="68" align="center">
+					<template #default="{ row }">
+						<el-button link type="primary" size="small" @click.stop="openAtt(row)">📎 {{ row.attachments_count || 0 }}</el-button>
+					</template>
+				</el-table-column>
+				<el-table-column :label="$t('message.pages.property.table.rules')" min-width="70" align="center">
+					<template #default="{ row }">
+						<el-button link type="primary" size="small" @click.stop="openRules(row)">📌 {{ row.reminder_rules_count || 0 }}</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+			<div v-if="!loading && list.length === 0" class="list-empty">
+				{{ keyword ? $t('message.pages.property.empty.noMatch') : $t('message.pages.property.empty.noData') }}
+			</div>
+		</div>
+
+		<!-- 分页 -->
+		<div v-if="total > pageSizeOptions[0]" class="pager">
+			<el-pagination background layout="total, sizes, prev, pager, next, jumper"
+				:total="total" :page-size="limit" :page-sizes="pageSizeOptions"
+				v-model:current-page="page" @current-change="load" @size-change="onSizeChange" />
+		</div>
+
+		<!-- 新增/编辑弹窗 -->
+		<el-dialog v-model="dialogVisible" :title="form.id ? $t('message.pages.property.dialog.editTitle') : $t('message.pages.property.dialog.addTitle')" width="900px" destroy-on-close
+			:close-on-click-modal="false" :close-on-press-escape="false">
+			<el-form ref="formRef" :model="form" :rules="rules" label-width="150px" label-position="left">
+				<el-form-item :label="$t('message.pages.property.dialog.roomName')" prop="name">
+					<el-input v-model="form.name" placeholder="" />
+				</el-form-item>
+				<el-row :gutter="12">
+					<el-col :span="12">
+						<el-form-item :label="$t('message.pages.property.dialog.owner')" prop="owner">
+							<el-select v-model="form.owner" filterable clearable :placeholder="$t('message.pages.property.dialog.ownerPlaceholder')" style="width:100%">
+								<el-option v-for="o in ownerOptions" :key="o.id" :label="o.name" :value="o.id" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+
+					<el-col :span="12">
+						<el-form-item :label="$t('message.pages.property.dialog.rent')" prop="rent_amount">
+							<el-input-number v-model="form.rent_amount" class="num-left" :min="0" :precision="2" :controls="false" style="width:100%">
+								<template #prefix><span class="bath-prefix">฿</span></template>
+							</el-input-number>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row :gutter="12">
+					<el-col :span="12">
+						<el-form-item :label="$t('message.pages.property.dialog.payPeriod')" prop="pay_period">
+							<el-select v-model="form.pay_period" style="width:100%">
+								<el-option :label="$t('message.pages.property.period.monthly')" value="Monthly" />
+								<el-option :label="$t('message.pages.property.period.quarterly')" value="Quarterly" />
+								<el-option :label="$t('message.pages.property.period.halfyear')" value="HalfYear" />
+								<el-option :label="$t('message.pages.property.period.yearly')" value="Yearly" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item :label="$t('message.pages.property.dialog.remindDay')" prop="remind_day">
+							<el-input-number v-model="form.remind_day" :min="1" :max="31" style="width:100%" />
+						</el-form-item>
+					</el-col>
+					
+				</el-row>
+				<el-form-item :label="$t('message.pages.property.dialog.rentStart')" prop="rent_start">
+					<el-date-picker v-model="form.rent_start" type="date" value-format="YYYY-MM-DD" style="width:100%" />
+				</el-form-item>
+				<el-form-item :label="$t('message.pages.property.dialog.rentEnd')" prop="rent_end">
+					<el-date-picker v-model="form.rent_end" type="date" value-format="YYYY-MM-DD" style="width:100%" />
+				</el-form-item>
+
+
+				<el-form-item :label="$t('message.pages.property.dialog.lineBot')" prop="line_bot">
+					<el-select v-model="form.line_bot" filterable clearable :placeholder="$t('message.pages.property.dialog.lineBotPlaceholder')" style="width:100%">
+						<el-option v-for="b in botOptions" :key="b.id" :label="b.name" :value="b.id" />
+					</el-select>
+				</el-form-item>
+
+
+
+				<el-row :gutter="12">
+					<el-col :span="24">
+						<el-form-item :label="$t('message.pages.property.dialog.groupId')" prop="group_id">
+							<el-input v-model="form.group_id" :placeholder="$t('message.pages.property.dialog.groupIdPlaceholder')" />
+						</el-form-item>
+					</el-col>
+				</el-row>
+
+				<el-form-item :label="$t('message.pages.property.dialog.memo')">
+					<el-input v-model="form.memo" type="textarea" :rows="5" placeholder="" />
+				</el-form-item>
+				
+				<!-- <el-form-item label="写入日历" prop="calendar_in">
+					<el-switch v-model="form.calendar_in" />
+					<span class="tip">选中则把付租/到期提醒写入 Google 日历</span>
+				</el-form-item> -->
+
+				<el-form-item :label="$t('message.pages.property.dialog.customPayMessage')">
+					<div class="msg-field">
+						<el-input v-model="form.custom_pay_message" type="textarea" :rows="3"
+							:placeholder="$t('message.pages.property.dialog.customPayPlaceholder')" />
+						<div class="msg-hint">{{ $t('message.pages.property.dialog.customPayHint') }}</div>
+					</div>
+				</el-form-item>
+				<el-form-item :label="$t('message.pages.property.dialog.customEndMessage')">
+					<div class="msg-field">
+						<el-input v-model="form.custom_end_message" type="textarea" :rows="3"
+							:placeholder="$t('message.pages.property.dialog.customEndPlaceholder')" />
+						<div class="msg-hint">{{ $t('message.pages.property.dialog.customEndHint') }}</div>
+					</div>
+				</el-form-item>
+
+			</el-form>
+			<template #footer>
+				<div class="dlg-footer">
+					<el-button v-if="form.id" class="dlg-del" @click="onDeleteInDialog">{{ $t('message.pages.property.dialog.delete') }}</el-button>
+					<span class="spacer"></span>
+					<el-button type="primary" :loading="saving" @click="save">{{ $t('message.pages.property.dialog.save') }}</el-button>
+					<el-button @click="dialogVisible = false">{{ $t('message.pages.property.dialog.cancel') }}</el-button>
+				</div>
+			</template>
+		</el-dialog>
+
+		<!-- 附件弹窗 -->
+		<el-dialog v-model="attVisible" :title="$t('message.pages.property.attachments.title')" width="680px" append-to-body class="att-dialog"
+			:close-on-click-modal="false" @closed="attVisible = false">
+			<!-- 房源信息卡 -->
+			<div class="att-scope">
+				<div class="att-scope-ico"><el-icon><ele-OfficeBuilding /></el-icon></div>
+				<div class="att-scope-main">
+					<div class="att-scope-name">{{ attProp.name || '' }}</div>
+					<div class="att-scope-hint">{{ $t('message.pages.property.attachments.hint') }}</div>
+				</div>
+				<el-button class="soft-link" size="small" :disabled="!attList.length" @click="downloadAll">
+					<el-icon style="margin-right: 4px"><ele-Download /></el-icon>{{ $t('message.pages.property.attachments.downloadAll') }}
+				</el-button>
+			</div>
+
+			<!-- 已上传文件 -->
+			<div class="att-sec">
+				<div class="att-sec-head">
+					<span class="att-sec-title">{{ $t('message.pages.property.attachments.uploaded') }}</span>
+					<span class="att-sec-count">{{ $t('message.pages.property.attachments.count', { n: attList.length }) }}</span>
+				</div>
+				<div class="att-panel" v-loading="attLoading">
+					<div v-if="!attLoading && attList.length === 0" class="att-empty">{{ $t('message.pages.property.attachments.empty') }}</div>
+					<div v-for="f in attList" :key="f.id" class="att-row">
+						<div class="att-ico">📄</div>
+						<div class="att-main">
+							<div class="att-name">{{ f.name }}</div>
+							<div class="att-meta">{{ f.size_label }} · {{ shortTime(f.create_datetime) }} · {{ f.creator_name || '—' }}</div>
+						</div>
+						<div class="att-acts">
+							<el-button class="soft-download" size="small" @click="downloadAtt(f)">
+								<el-icon style="margin-right: 4px"><ele-Download /></el-icon>{{ $t('message.pages.property.attachments.download') }}
+							</el-button>
+							<el-button class="soft-del" size="small" @click="onDelAtt(f)">
+								<el-icon style="margin-right: 4px"><ele-Delete /></el-icon>{{ $t('message.pages.property.attachments.delete') }}
+							</el-button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 上传新文件 -->
+			<div class="att-sec">
+				<div class="att-sec-head">
+					<span class="att-sec-title">{{ $t('message.pages.property.attachments.upload') }}</span>
+					<span class="att-sec-hint">{{ $t('message.pages.property.attachments.uploadHint') }}</span>
+				</div>
+				<div class="att-panel">
+					<el-upload ref="attUploadRef" class="att-drop" :auto-upload="false" drag multiple :limit="10"
+						:on-change="attOnChange" :on-remove="attOnRemove" :file-list="attFiles" :show-file-list="true">
+						<el-icon class="el-icon--upload"><ele-UploadFilled /></el-icon>
+						<div class="el-upload__text" v-html="$t('message.pages.property.attachments.uploadText')"></div>
+					</el-upload>
+					<div class="att-upload-bar">
+						<span class="att-upload-note">{{ attFiles.length ? $t('message.pages.property.attachments.pending', { n: attFiles.length }) : $t('message.pages.property.attachments.noneSelected') }}</span>
+						<div class="att-upload-actions">
+							<el-button class="soft-ghost" :disabled="!attFiles.length" @click="clearPending">{{ $t('message.pages.property.attachments.clear') }}</el-button>
+							<el-button class="soft-primary" :loading="attUploading" :disabled="!attFiles.length" @click="submitAtt">
+								{{ $t('message.pages.property.attachments.uploadBtn') }}{{ attFiles.length ? ` (${attFiles.length})` : '' }}
+							</el-button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<template #footer><el-button class="soft-ghost" @click="attVisible = false">{{ $t('message.pages.property.attachments.close') }}</el-button></template>
+		</el-dialog>
+
+		<!-- 批量导入房源 -->
+		<PropertyImportDialog v-model="importVisible" @imported="load" />
+
+		<!-- 自定义提醒规则管理 -->
+		<el-dialog v-model="rulesVisible" :title="$t('message.pages.property.rules.title', { name: rulesProp?.name || '' })" width="640px" append-to-body
+			:close-on-click-modal="false" @closed="rulesVisible = false">
+			<div class="rules-tip">
+				{{ $t('message.pages.property.rules.tip') }}
+			</div>
+			<div v-loading="rulesLoading" class="rules-panel">
+				<div v-if="!rulesLoading && ruleList.length === 0" class="rules-empty">
+					{{ $t('message.pages.property.rules.empty') }}
+				</div>
+				<div v-for="r in ruleList" :key="r.id" class="rule-row" :class="{ disabled: !r.enabled }">
+					<div class="rule-main">
+						<div style="margin-top:15px;"></div>
+						<div class="rule-title">
+							<li><span class="rule-name">{{ r.type === 'utility' ? $t('message.pages.property.rules.utility') : $t('message.pages.property.rules.custom') }}</span>
+							<span class="rule-period">{{ periodLabel(r.period) }}&nbsp;</span>
+							<span class="rule-day">{{ r.day }}{{ $t('message.pages.property.day') }}</span>
+							<el-tag v-if="!r.enabled" size="small" type="info">{{ $t('message.pages.property.rules.disabled') }}</el-tag></li>
+						</div>
+						<div class="rule-meta" v-if="r.next_date">{{ $t('message.pages.property.rules.nextRemind', { date: r.next_date }) }}</div>
+						<div class="rule-preview" v-if="r.preview">{{ shortRulePreview(r.preview) }}</div>
+					</div>
+					<div class="rule-acts">
+						<el-button class="soft-link" size="small" @click="editRule(r)">{{ $t('message.pages.property.rules.edit') }}</el-button>
+						<el-button class="soft-del" size="small" @click="delRule(r)">{{ $t('message.pages.property.rules.delete') }}</el-button>
+					</div>
+				</div>
+			</div>
+			<template #footer>
+				<div class="dlg-footer">
+					<span class="spacer"></span>
+					<el-button class="soft-primary" @click="addRule">
+						<el-icon style="margin-right:4px"><ele-Plus /></el-icon>{{ $t('message.pages.property.rules.add') }}
+					</el-button>
+					<el-button class="soft-ghost" @click="rulesVisible = false">{{ $t('message.pages.property.rules.close') }}</el-button>
+				</div>
+			</template>
+		</el-dialog>
+
+		<ReminderRuleDialog v-model="ruleDialogVisible" :prop="rulesProp" :editing="editingRule"
+			@saved="onRuleSaved" />
+
+		<!-- AI 助手 -->
+		<AIAssistDialog v-model="aiVisible" @saved="load" />
+
+		<!-- 负责人变更记录 -->
+		<el-dialog v-model="ownerLogsVisible" :title="$t('message.pages.property.ownerLogs.title', { name: ownerLogsProp?.name || '' })" width="620px" append-to-body
+			:close-on-click-modal="false" @closed="ownerLogsVisible = false">
+			<div v-loading="ownerLogsLoading" class="ownerlogs">
+				<div v-if="!ownerLogsLoading && ownerLogs.length === 0" class="ownerlogs-empty">
+					{{ $t('message.pages.property.ownerLogs.empty') }}
+				</div>
+				<div v-for="log in ownerLogs" :key="log.id" class="ownerlogs-row">
+					<div class="olog-main">
+						<div class="olog-text">
+							<b>{{ log.user_name || '—' }}</b>
+							<span class="arrow">→ {{ $t('message.pages.property.ownerLogs.reassign') }}</span>
+							<span class="olog-val">{{ log.from_value || $t('message.pages.property.ownerLogs.emptyVal') }}</span>
+							<el-icon class="olog-ico"><ele-Right /></el-icon>
+							<span class="olog-val">{{ log.to_value || $t('message.pages.property.ownerLogs.emptyVal') }}</span>
+						</div>
+						<div class="olog-time">{{ fmtTime(log.create_datetime) }}</div>
+					</div>
+				</div>
+			</div>
+			<template #footer>
+				<div class="dlg-footer">
+					<span class="spacer"></span>
+					<el-button class="soft-ghost" @click="ownerLogsVisible = false">{{ $t('message.pages.property.ownerLogs.close') }}</el-button>
+				</div>
+			</template>
+		</el-dialog>
+	</div>
+</template>
+
+<script lang="ts" setup name="property">
+import { ref, reactive, computed, onMounted } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
+import { useUserInfo } from '/@/stores/userInfo';
+import { apiPrefix, GetList, AddObj, UpdateObj, DelObj, ListAttachments, UploadAttachments, DelAttachment, GetOwnerLogs, ListReminderRules, DelReminderRule } from './api';
+import PropertyImportDialog from './components/PropertyImportDialog.vue';
+import ReminderRuleDialog from './components/ReminderRuleDialog.vue';
+import AIAssistDialog from './components/AIAssistDialog.vue';
+import { request } from '/@/utils/service';
+import { downloadFile } from '/@/utils/service';
+import { getBaseURL } from '/@/utils/baseUrl';
+
+const { t } = useI18n();
+const { userInfos } = storeToRefs(useUserInfo());
+
+// 租户职级角色 key: 经理(tenant_manager)/主管(tenant_supervisor)/员工(tenant_emp);
+// 超管(is_superuser)默认拥有所有数据权限
+const roleKeys = computed(() => (userInfos.value.role_info || []).map((r: any) => r.key));
+const isManagerView = computed(() => userInfos.value.is_superuser || roleKeys.value.includes('tenant_manager') || roleKeys.value.includes('tenant_supervisor'));
+
+const list = ref<any[]>([]);
+const total = ref(0);
+const page = ref(1);
+// 每页条数: 管理员可在 .env 的 VITE_PROPERTY_PAGE_SIZE 调整(卡片/列表共用)
+const envPageSize = Number(import.meta.env.VITE_PROPERTY_PAGE_SIZE);
+const limit = ref(Number.isFinite(envPageSize) && envPageSize > 0 ? envPageSize : 12);
+// 分页可选每页条数(含当前值, 方便管理员通过环境变量自定义)
+const pageSizeOptions = ref<number[]>([...new Set([12, 24, 48, 100, Number(limit.value)])].sort((a, b) => a - b));
+const viewMode = ref<'card' | 'list'>('list');
+const listHeaderStyle = { background: '#1f1f1f', color: '#b1b4b8', borderColor: '#2a2a2a' };
+const keyword = ref('');
+const ordering = ref('');
+const loading = ref(false);
+const dialogVisible = ref(false);
+const importVisible = ref(false);
+const saving = ref(false);
+const formRef = ref<any>();
+const ownerOptions = ref<any[]>([]);
+const botOptions = ref<any[]>([]);
+
+const emptyForm = () => ({ id: '', name: '', rent_amount: undefined, remind_day: 1, pay_period: 'Monthly', rent_start: '', rent_end: '', group_id: '', owner: undefined, line_bot: undefined, calendar_in: true, if_annual_notify: false, memo: '', custom_pay_message: '', custom_end_message: '' });
+const form = reactive<any>(emptyForm());
+
+
+	// line_bot: [{ required: true, message: '请选择 LineBot', trigger: 'change' }],
+	// group_id: [{ required: true, message: '请输入 Line 群ID', trigger: 'blur' }],
+	const rules = {
+	name: [{ required: true, message: t('message.pages.property.validation.nameRequired'), trigger: 'blur' }],
+	remind_day: [{ required: true, message: t('message.pages.property.validation.remindDayRequired'), trigger: 'blur' }],
+	pay_period: [{ required: true, message: t('message.pages.property.validation.payPeriodRequired'), trigger: 'change' }],
+	rent_start: [{ required: true, message: t('message.pages.property.validation.rentStartRequired'), trigger: 'change' }],
+	rent_end: [{ required: true, message: t('message.pages.property.validation.rentEndRequired'), trigger: 'change' }],
+	owner: [{ required: true, message: t('message.pages.property.validation.ownerRequired'), trigger: 'change' }],
+	line_bot: [{ required: false, message: '', trigger: 'change' }],
+	group_id: [{ required: false, message: '', trigger: 'blur' }],
+};
+
+// 是否已到期: rent_end 存在且早于今天
+const isExpired = (p: any) => {
+	const end = p?.rent_end;
+	if (!end) return false;
+	const d = new Date(String(end).slice(0, 10));
+	if (isNaN(d.getTime())) return false;
+	return d.getTime() < new Date(new Date().toDateString()).getTime();
+};
+const fmtMoney = (v: any) => (v === null || v === undefined || v === '' ? '—' : Number(v).toLocaleString());
+const fmtTime = (v: any) => (v ? String(v).replace('T', ' ').slice(0, 16) : '');
+const shortMemo = (v: any) => (v && v.length > 20 ? v.slice(0, 20) + '…' : v || '');
+const periodLabel = (v: any) => (v === 'Quarterly' ? t('message.pages.property.period.quarterly') : v === 'HalfYear' ? t('message.pages.property.period.halfyear') : v === 'Yearly' ? t('message.pages.property.period.yearly') : t('message.pages.property.period.monthly'));
+
+const onSearch = () => { page.value = 1; load(); };
+
+// 列表视图: 点击行 = 打开编辑
+const rowClick = (row: any) => { openEdit(row); };
+
+// 列表视图: 列排序(name / rent_end / line_bot -> ordering)
+const onSortChange = ({ prop, order }: any) => {
+	if (order === 'ascending') ordering.value = prop;
+	else if (order === 'descending') ordering.value = `-${prop}`;
+	else ordering.value = '';
+	page.value = 1;
+	load();
+};
+
+const exporting = ref(false);
+
+const onExport = async () => {
+	if (exporting.value) return;
+	exporting.value = true;
+	try {
+		await downloadFile({
+			url: apiPrefix + 'export_csv/',
+			method: 'get',
+			params: keyword.value ? { keyword: keyword.value } : {},
+		});
+		ElMessage.success(t('message.pages.property.toolbar.exported'));
+	} catch (e) {
+		console.error(e);
+		ElMessage.error(t('message.pages.property.toolbar.exportFail'));
+	} finally {
+		exporting.value = false;
+	}
+};
+
+const load = async () => {
+	loading.value = true;
+	try {
+		const res: any = await GetList({ page: page.value, limit: limit.value, keyword: keyword.value, ordering: ordering.value });
+		if (res.code === 2000) {
+			list.value = res.data;
+			total.value = res.total || res.data.length || 0;
+		}
+	} finally {
+		loading.value = false;
+	}
+};
+
+const loadOptions = async () => {
+	try {
+		const [uo, bo]: any = await Promise.all([
+			request({ url: '/api/system/user/options/', method: 'get' }),
+			request({ url: '/api/notify/linebot/options/', method: 'get' }),
+		]);
+		ownerOptions.value = uo.data || [];
+		botOptions.value = bo.data || [];
+		// 若在新增态且公司只有一个 bot, 等下拉回来后也自动带出
+		if (!form.id && botOptions.value.length === 1) form.line_bot = botOptions.value[0].id;
+	} catch (e) { /* ignore */ }
+};
+
+const openAdd = () => {
+	Object.assign(form, emptyForm());
+	// 负责人默认 = 当前用户自己(新建时不用选)
+	form.owner = userInfos.value.id ? Number(userInfos.value.id) : undefined;
+	// 本租户只有一个 bot 时, 自动帮用户带出(免选); 多个时才要求手动选
+	if (botOptions.value.length === 1) form.line_bot = botOptions.value[0].id;
+	dialogVisible.value = true;
+};
+
+const openEdit = (row: any) => {
+	Object.assign(form, emptyForm(), row);
+	// 后端 Decimal 序列化为字符串, ElInputNumber 需要 number; 空值保持 undefined/原样
+	if (typeof form.rent_amount === 'string' && form.rent_amount !== '') {
+		const num = Number(form.rent_amount);
+		form.rent_amount = Number.isNaN(num) ? form.rent_amount : num;
+	}
+	if (typeof form.remind_day === 'string' && form.remind_day !== '') {
+		const num = Number(form.remind_day);
+		form.remind_day = Number.isNaN(num) ? form.remind_day : num;
+	}
+	dialogVisible.value = true;
+};
+
+const save = async () => {
+	await formRef.value.validate(async (valid: boolean) => {
+		if (!valid) return;
+		saving.value = true;
+		try {
+			// 空字符串转 null, 避免后端日期/外键校验报格式错; owner 留空=交给后端默认"创建人自己"
+			const payload: any = { ...form };
+			for (const k of ['rent_start', 'rent_end', 'group_id', 'memo']) {
+				if (payload[k] === '') payload[k] = null;
+			}
+			if (payload.owner === '' || payload.owner === undefined) {
+				if (!form.id) delete payload.owner;
+				else payload.owner = null;
+			}
+			if (payload.line_bot === '' || payload.line_bot === undefined) payload.line_bot = null;
+			if (form.id) {
+				const res: any = await UpdateObj({ ...payload, id: form.id });
+				if (res.code === 2000) { ElMessage.success(t('message.pages.property.message.saved')); dialogVisible.value = false; load(); }
+			} else {
+				const res: any = await AddObj(payload);
+				if (res.code === 2000) { ElMessage.success(t('message.pages.property.message.added')); dialogVisible.value = false; load(); }
+			}
+		} finally {
+			saving.value = false;
+		}
+	});
+};
+
+const onDelete = async (row: any) => {
+	try {
+		// 删除提示
+		await ElMessageBox.confirm(t('message.pages.property.message.deleteConfirm', { name: row.name }), t('message.pages.property.message.deleteTitle'), { type: 'warning' });
+		const res: any = await DelObj(row.id);
+		if (res.code === 2000) {
+			ElMessage.success(t('message.pages.property.message.deleted'));
+			load();
+		}
+	} catch (e) { /* 取消 */ }
+};
+
+const onDeleteInDialog = () => {
+	const id = form.id;
+	const name = form.name;
+	dialogVisible.value = false;
+	onDelete({ id, name });
+};
+
+// ---------------- 负责人变更记录 ----------------
+const ownerLogsVisible = ref(false);
+const ownerLogsLoading = ref(false);
+const ownerLogsProp = ref<any>({});
+const ownerLogs = ref<any[]>([]);
+
+const openOwnerLogs = async (p: any) => {
+	ownerLogsProp.value = p;
+	ownerLogsVisible.value = true;
+	ownerLogsLoading.value = true;
+	ownerLogs.value = [];
+	try {
+		const res: any = await GetOwnerLogs(p.id);
+		if (res.code === 2000) ownerLogs.value = res.data || [];
+	} finally {
+		ownerLogsLoading.value = false;
+	}
+};
+
+// ---------------- 附件(合同/收据等) ----------------
+const attVisible = ref(false);
+const attProp = ref<any>({});
+const attList = ref<any[]>([]);
+const attLoading = ref(false);
+const attUploading = ref(false);
+const attUploadRef = ref<any>();
+const attFiles = ref<any[]>([]);
+const shortTime = (v: any) => (v ? String(v).replace('T', ' ').slice(0, 16) : '');
+
+const openAtt = (p: any) => {
+	attProp.value = p;
+	attFiles.value = [];
+	attVisible.value = true;
+	loadAtt();
+};
+
+const loadAtt = async () => {
+	attLoading.value = true;
+	try {
+		const res: any = await ListAttachments(attProp.value.id);
+		if (res.code === 2000) attList.value = res.data || [];
+	} finally {
+		attLoading.value = false;
+	}
+};
+
+const attOnChange = (_file: any, fileList: any[]) => {
+	attFiles.value = fileList.map((f) => f.raw).filter(Boolean);
+};
+
+const attOnRemove = (_file: any, fileList: any[]) => {
+	attFiles.value = fileList.map((f: any) => f.raw || f).filter(Boolean);
+};
+
+const submitAtt = async () => {
+	if (!attFiles.value.length) { ElMessage.warning(t('message.pages.property.attachments.selectFirst')); return; }
+	attUploading.value = true;
+	try {
+		const res: any = await UploadAttachments(attProp.value.id, attFiles.value);
+		if (res.code === 2000) {
+			ElMessage.success(res.msg || t('message.pages.property.attachments.uploaded'));
+			attFiles.value = [];
+			if (attUploadRef.value) attUploadRef.value.clearFiles();
+			loadAtt();
+			load();
+		}
+	} finally {
+		attUploading.value = false;
+	}
+};
+
+const downloadAtt = (f: any) => {
+	window.open(getBaseURL(f.url), '_blank');
+};
+
+const downloadAll = () => {
+	if (!attList.value.length) return;
+	attList.value.forEach((f) => window.open(getBaseURL(f.url), '_blank'));
+};
+
+const clearPending = () => {
+	attFiles.value = [];
+	if (attUploadRef.value) attUploadRef.value.clearFiles();
+};
+
+const onDelAtt = async (f: any) => {
+	try {
+		await ElMessageBox.confirm(t('message.pages.property.attachments.deleteConfirm', { name: f.name }), t('message.pages.property.message.deleteTitle'), { type: 'warning' });
+		const res: any = await DelAttachment(f.id);
+		if (res.code === 2000) {
+			ElMessage.success(t('message.pages.property.message.deleted'));
+			loadAtt();
+			load();
+		}
+	} catch (e) { /* 取消 */ }
+};
+
+// ---------------- 自定义提醒规则 ----------------
+const rulesVisible = ref(false);
+const rulesProp = ref<any>({});
+const ruleList = ref<any[]>([]);
+const rulesLoading = ref(false);
+const aiVisible = ref(false);
+const ruleDialogVisible = ref(false);
+const editingRule = ref<any>(null);
+
+const shortRulePreview = (v: any) => (v && v.length > 60 ? v.slice(0, 60) + '…' : v || '');
+
+const openRules = async (p: any) => {
+	rulesProp.value = p;
+	rulesVisible.value = true;
+	await loadRules();
+};
+
+const loadRules = async () => {
+	rulesLoading.value = true;
+	try {
+		const res: any = await ListReminderRules(rulesProp.value.id);
+		if (res.code === 2000) {
+			ruleList.value = res.data || [];
+		}
+	} finally {
+		rulesLoading.value = false;
+	}
+};
+
+const addRule = () => {
+	editingRule.value = null;
+	ruleDialogVisible.value = true;
+};
+
+const editRule = (r: any) => {
+	editingRule.value = r;
+	ruleDialogVisible.value = true;
+};
+
+const delRule = async (r: any) => {
+	try {
+		await ElMessageBox.confirm(t('message.pages.property.rules.deleteConfirm'), t('message.pages.property.message.deleteTitle'), { type: 'warning' });
+		const res: any = await DelReminderRule(r.id);
+		if (res.code === 2000) {
+			ElMessage.success(t('message.pages.property.message.deleted'));
+			loadRules();
+			load();
+		}
+	} catch (e) { /* 取消 */ }
+};
+
+const onRuleSaved = () => {
+	loadRules();
+	load();
+};
+
+onMounted(() => {
+	load();
+	loadOptions();
+});
+</script>
+
+<style scoped lang="scss">
+.prop-page {
+	color: #eaeaea;
+
+	.toolbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16px;
+
+		.left .title { font-size: 18px; font-weight: 600; color: #f4f4f5; }
+		.left .count { margin-left: 8px; font-size: 13px; color: #b1b4b8; }
+		.right { display: flex; gap: 10px; align-items: center; }
+		.search { width: 260px; }
+		.search-ico {
+			cursor: pointer;
+			color: #b1b4b8;
+			transition: color 0.2s;
+			&:hover { color: #409eff; }
+		}
+	}
+
+	.cards {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 14px;
+		min-height: 200px;
+
+		.empty {
+			grid-column: 1 / -1;
+			text-align: center;
+			color: #94979c;
+			padding: 60px 0;
+		}
+
+		.card {
+			background: #1a1a1c;
+			border: 1px solid #2a2a2a;
+			border-radius: 12px;
+			padding: 16px 18px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			transition: border-color 0.2s;
+
+			&:hover { border-color: rgba(64, 158, 255, 0.45); }
+
+			.card-head {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				gap: 8px;
+				.nm { font-weight: 600; color: #f4f4f5; word-break: break-all; }
+				.nm.expired { color: #ffa940; }
+				.badges { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+				.bdg {
+					display: inline-flex;
+					align-items: center;
+					line-height: 1;
+					font-size: 11px;
+					padding: 3px 7px;
+					border-radius: 4px;
+					background: rgba(255, 255, 255, 0.06);
+					color: #b1b4b8;
+					border: 1px solid transparent;
+					&.m { color: #409eff; background: rgba(64, 158, 255, 0.12); border: 1px solid rgba(64, 158, 255, 0.35); }
+					&.q { color: #e6a23c; background: rgba(230, 162, 60, 0.12); border: 1px solid rgba(230, 162, 60, 0.35); }
+					&.hy { color: #67c23a; background: rgba(103, 194, 58, 0.12); border: 1px solid rgba(103, 194, 58, 0.35); }
+					&.y { color: #b37feb; background: rgba(179, 127, 235, 0.12); border: 1px solid rgba(179, 127, 235, 0.35); }
+					&.exp { color: #ffa940; background: rgba(255, 169, 64, 0.14); border: 1px solid rgba(255, 169, 64, 0.4); }
+					&.bdg-click {
+						cursor: pointer;
+						transition: background 0.15s, color 0.15s;
+						&:hover { background: rgba(64, 158, 255, 0.18); color: #79bbff; border-color: rgba(64, 158, 255, 0.6); }
+					}
+				}
+			}
+
+			.row {
+				display: flex;
+				justify-content: space-between;
+				gap: 10px;
+				font-size: 13px;
+				.k { color: #b1b4b8; flex-shrink: 0; }
+				.v { color: #d8dade; text-align: right; word-break: break-all; &.tail { max-width: 60%; } }
+				.v.memo {
+					max-width: 60%;
+					min-width: 0;
+					flex-shrink: 1;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+				.v.gid {
+					max-width: 60%;
+					min-width: 0;
+					flex-shrink: 1;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+			}
+
+			.card-foot {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-top: 4px;
+				border-top: 1px dashed rgba(255, 255, 255, 0.07);
+				padding-top: 8px;
+				.updated { font-size: 11px; color: #94979c; }
+				.acts { display: flex; gap: 2px; }
+			}
+		}
+	}
+
+	.pager {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 18px;
+	}
+
+	// 负责人变更记录弹窗
+	.ownerlogs {
+		min-height: 60px;
+		.ownerlogs-empty {
+			text-align: center;
+			color: #94979c;
+			padding: 30px 0;
+			font-size: 13px;
+		}
+		.ownerlogs-row {
+			padding: 12px 14px;
+			border: 1px solid #2a2a2a;
+			border-radius: 10px;
+			background: #1a1a1c;
+			margin-bottom: 10px;
+			.olog-main {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 10px;
+			}
+			.olog-text {
+				font-size: 13px;
+				color: #d8dade;
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				flex-wrap: wrap;
+				b { color: #f0f0f1; font-weight: 600; }
+				.arrow { color: #b1b4b8; }
+				.olog-val { color: #9ec9ff; }
+				.olog-ico { color: #7d8188; }
+			}
+			.olog-time { font-size: 12px; color: #94979c; flex-shrink: 0; }
+		}
+	}
+
+	// 视图切换按钮(柔和)
+	.view-switch {
+		margin-right: 2px;
+		:deep(.el-radio-button__inner) {
+			background: rgba(255, 255, 255, 0.04);
+			border-color: #333;
+			color: #b1b4b8;
+			font-weight: 400;
+		}
+		:deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+			background: rgba(64, 158, 255, 0.2);
+			border-color: rgba(64, 158, 255, 0.45);
+			color: #9ec9ff;
+			box-shadow: -1px 0 0 0 rgba(64, 158, 255, 0.45);
+		}
+		:deep(.el-radio-button:first-child .el-radio-button__inner) { border-radius: 8px 0 0 8px; }
+		:deep(.el-radio-button:last-child .el-radio-button__inner) { border-radius: 0 8px 8px 0; }
+	}
+
+	// 列表视图(表格)
+	.list-wrap {
+		background: #1a1a1c;
+		border: 1px solid #2a2a2a;
+		border-radius: 12px;
+		overflow: hidden;
+
+		:deep(.el-table) {
+			--el-table-border-color: #2a2a2a;
+			--el-table-bg-color: transparent;
+			--el-table-tr-bg-color: transparent;
+			--el-table-header-bg-color: transparent;
+			--el-table-row-hover-bg-color: rgba(255, 255, 255, 0.04);
+			--el-table-text-color: #d8dade;
+			--el-table-header-text-color: #b1b4b8;
+
+			background: transparent;
+			.el-table__cell { color: #d8dade; }
+			.el-table__row { cursor: pointer; }
+		}
+
+		.lt-name { color: #f0f0f1; font-weight: 600; margin-right: 6px; }
+		.lt-name.expired { color: #ffa940; }
+		.lt-bdg {
+			display: inline-block;
+			font-size: 11px;
+			line-height: 1;
+			padding: 3px 7px;
+			border-radius: 4px;
+			&.m { color: #409eff; background: rgba(64, 158, 255, 0.12); border: 1px solid rgba(64, 158, 255, 0.35); }
+			&.q { color: #e6a23c; background: rgba(230, 162, 60, 0.12); border: 1px solid rgba(230, 162, 60, 0.35); }
+			&.hy { color: #67c23a; background: rgba(103, 194, 58, 0.12); border: 1px solid rgba(103, 194, 58, 0.35); }
+			&.y { color: #b37feb; background: rgba(179, 127, 235, 0.12); border: 1px solid rgba(179, 127, 235, 0.35); }
+			&.exp { color: #ffa940; background: rgba(255, 169, 64, 0.14); border: 1px solid rgba(255, 169, 64, 0.4); }
+		}
+		.lt-muted { color: #b1b4b8; }
+		.lt-gid {
+			display: inline-block;
+			max-width: 100%;
+			font-size: 12px;
+			overflow-wrap: anywhere;
+			word-break: break-all;
+			white-space: normal;
+			vertical-align: middle;
+			line-height: 1.4;
+		}
+		.lt-memo {
+			display: inline-block;
+			max-width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			vertical-align: middle;
+		}
+		.list-empty {
+			text-align: center;
+			color: #94979c;
+			padding: 60px 0;
+		}
+	}
+
+	.tip { margin-left: 10px; font-size: 12px; color: #b1b4b8; }
+
+	/* 租金输入框: 左对齐 + 泰铢前缀 */
+	.num-left {
+		:deep(.el-input__inner) {
+			text-align: left;
+		}
+	}
+	.bath-prefix {
+		color: #b1b4b8;
+		padding-right: 6px;
+	}
+
+	/* 自定义消息字段 */
+	.msg-field {
+		width: 100%;
+	}
+	.msg-hint {
+		font-size: 11px;
+		color: #94979c;
+		margin-top: 4px;
+		line-height: 1.5;
+	}
+
+.dlg-footer { display: flex; align-items: center; .spacer { flex: 1; } }
+
+		/* 自定义提醒规则 */
+		.rules-tip {
+			font-size: 12px;
+			color: #b1b4b8;
+			line-height: 1.6;
+			background: rgba(64, 158, 255, 0.05);
+			border: 1px solid rgba(64, 158, 255, 0.2);
+			border-radius: 8px;
+			padding: 8px 12px;
+			margin-bottom: 12px;
+		}
+
+		.rules-panel {
+			min-height: 80px;
+			max-height: 420px;
+			overflow-y: auto;
+
+			.rules-empty {
+				text-align: center;
+				color: #94979c;
+				padding: 34px 0;
+				font-size: 13px;
+			}
+
+			.rule-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 12px;
+				padding: 12px 14px;
+				border: 1px solid #2a2a2a;
+				border-radius: 10px;
+				background: #1a1a1c;
+				margin-bottom: 10px;
+
+				&.disabled { opacity: 0.55; }
+
+				.rule-main { min-width: 0; flex: 1; }
+				.rule-title {
+					display: flex;
+					align-items: center;
+					gap: 8px;
+					flex-wrap: wrap;
+
+					.rule-name { font-weight: 600; color: #f0f0f1; }
+					.rule-period { font-size: 12px; color: #e6a23c; }
+					.rule-day { font-size: 12px; color: #b1b4b8; }
+				}
+				.rule-meta { font-size: 12px; color: #9ec9ff; margin-top: 4px; }
+				.rule-preview {
+					margin-top: 5px;
+					font-size: 12px;
+					color: #b1b4b8;
+					white-space: pre-wrap;
+					word-break: break-word;
+				}
+				.rule-acts { display: flex; gap: 4px; flex-shrink: 0; }
+			}
+		}
+
+		/* 柔和删除按钮(同超管控制台 soft-del 半透明底+红字, 与操作区分) */
+		.dlg-del {
+			background: rgba(245, 108, 108, 0.12) !important;
+			border-color: rgba(245, 108, 108, 0.5) !important;
+			color: #f56c6c !important;
+
+			&:hover,
+			&:focus {
+				background: rgba(245, 108, 108, 0.22) !important;
+				border-color: rgba(245, 108, 108, 0.7) !important;
+				color: #f87171 !important;
+			}
+		}
+	}
+</style>
+<style lang="scss">
+/* 附件管理弹窗(teleport 到 body, 不用 scoped 以命中) */
+// ---- 柔和按钮(半透明底 + 彩色字, 与页面风格统一不刺眼) ----
+.soft-primary {
+background: rgba(64, 158, 255, 0.12) !important;
+border-color: rgba(64, 158, 255, 0.5) !important;
+color: #409eff !important;
+&:hover, &:focus {
+background: rgba(64, 158, 255, 0.22) !important;
+border-color: rgba(64, 158, 255, 0.7) !important;
+color: #79bbff !important;
+}
+}
+.soft-download {
+background: rgba(64, 158, 255, 0.10) !important;
+border-color: rgba(64, 158, 255, 0.35) !important;
+color: #7fb3ff !important;
+&:hover, &:focus { background: rgba(64, 158, 255, 0.20) !important; color: #a9cbff !important; }
+}
+.soft-del {
+background: rgba(245, 108, 108, 0.10) !important;
+border-color: rgba(245, 108, 108, 0.35) !important;
+color: #f28f8f !important;
+&:hover, &:focus { background: rgba(245, 108, 108, 0.20) !important; color: #ff9f9f !important; }
+}
+.soft-ghost {
+background: transparent !important;
+border-color: #333 !important;
+color: #b1b4b8 !important;
+&:hover, &:focus { background: rgba(255, 255, 255, 0.05) !important; color: #c0c4cc !important; }
+}
+.soft-ai {
+background: linear-gradient(135deg, rgba(124, 93, 250, 0.16), rgba(64, 158, 255, 0.16)) !important;
+border-color: rgba(124, 93, 250, 0.5) !important;
+color: #b0a3ff !important;
+&:hover, &:focus {
+background: linear-gradient(135deg, rgba(124, 93, 250, 0.26), rgba(64, 158, 255, 0.26)) !important;
+border-color: rgba(124, 93, 250, 0.75) !important;
+color: #cdc1ff !important;
+}
+}
+.soft-link {
+background: transparent !important;
+border: none !important;
+color: #7fb3ff !important;
+padding: 0 !important;
+&:hover, &:focus { color: #a9cbff !important; }
+&:disabled { color: #7d8188 !important; }
+}
+
+// ---- 附件管理弹窗 ----
+.att-dialog {
+:deep(.el-dialog__body) {
+padding: 6px 26px 18px;
+}
+}
+.att-scope {
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 14px 16px;
+margin-bottom: 22px;
+background: linear-gradient(90deg, rgba(64, 158, 255, 0.08), rgba(64, 158, 255, 0.02));
+border: 1px solid rgba(64, 158, 255, 0.2);
+border-radius: 12px;
+
+.att-scope-ico {
+width: 42px; height: 42px;
+display: flex; align-items: center; justify-content: center;
+border-radius: 10px;
+background: rgba(64, 158, 255, 0.14);
+color: #409eff;
+font-size: 22px;
+flex-shrink: 0;
+}
+.att-scope-main { flex: 1; min-width: 0; }
+.att-scope-name { font-weight: 600; color: #f0f0f1; word-break: break-all; font-size: 15px; }
+.att-scope-hint { font-size: 12px; color: #b1b4b8; margin-top: 3px; }
+}
+
+.att-sec {
+margin-bottom: 24px;
+
+.att-sec-head {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 10px;
+
+.att-sec-title {
+font-size: 14px;
+font-weight: 600;
+color: #eaeaea;
+}
+.att-sec-count {
+font-size: 12px;
+color: #409eff;
+background: rgba(64, 158, 255, 0.12);
+border-radius: 10px;
+padding: 1px 9px;
+}
+.att-sec-hint { font-size: 12px; color: #b1b4b8; margin-left: 4px; }
+}
+}
+
+.att-panel {
+border: 1px solid #2a2a2a;
+border-radius: 12px;
+background: #1a1a1c;
+overflow: hidden;
+}
+
+.att-row {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 14px;
+border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+transition: background 0.15s;
+
+&:last-child { border-bottom: none; }
+&:hover { background: rgba(255, 255, 255, 0.03); }
+
+.att-ico {
+width: 38px; height: 38px;
+display: flex; align-items: center; justify-content: center;
+border-radius: 9px;
+background: rgba(255, 255, 255, 0.05);
+font-size: 18px;
+flex-shrink: 0;
+}
+.att-main { flex: 1; min-width: 0; }
+.att-name { color: #eaeaea; font-size: 14px; word-break: break-all; }
+.att-meta { font-size: 12px; color: #b1b4b8; margin-top: 3px; }
+.att-acts { display: flex; gap: 8px; flex-shrink: 0; }
+}
+
+.att-empty {
+text-align: center;
+color: #94979c;
+padding: 30px 0;
+font-size: 13px;
+}
+
+.att-drop {
+:deep(.el-upload-dragger) {
+padding: 26px 20px;
+border: 1px dashed #333;
+border-radius: 12px;
+background: transparent;
+&:hover { border-color: rgba(64, 158, 255, 0.5); }
+.el-icon--upload { color: #94979c; margin-bottom: 6px; }
+.el-upload__text { color: #b1b4b8; em { color: #409eff; } }
+}
+}
+
+.att-upload-bar {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 12px 14px;
+border-top: 1px solid #2a2a2a;
+
+.att-upload-note { font-size: 12px; color: #b1b4b8; }
+.att-upload-actions { display: flex; gap: 10px; }
+}
+
+.divider {
+  width: 100%;
+  height: 0.1px;
+  background-color: rgb(77, 77, 77);
+  margin: 5px 0; /* 上下外边距，控制分割线距离 */
+}
+
+.divider-dashed{
+  width:100%;
+  border-bottom:1px dashed #cccccc;
+  margin:16px 0;
+}
+
+</style>

@@ -1,0 +1,887 @@
+<template>
+	<div class="page property-page">
+		<header class="topbar">
+			<div class="brand-mini">
+				<BrandMark :size="34" />
+				<span>pro<b>Notify</b></span>
+			</div>
+			<button class="account-btn" type="button" @click="accountVisible = true">
+				<span class="account-avatar">{{ auth.initial }}</span>
+				<Icon name="chevronDown" :size="14" />
+			</button>
+		</header>
+
+		<section class="page-head">
+			<p class="eyebrow">PROPERTY</p>
+			<h1>Property management</h1>
+			<p class="subtitle"><strong>{{ total }}</strong> {{ total === 1 ? 'room' : 'rooms' }} · tap a card to edit</p>
+		</section>
+
+		<section class="search-row">
+			<van-search
+				v-model="keyword"
+				shape="round"
+				background="transparent"
+				placeholder="Search room name"
+				:clearable="false"
+				@search="reset"
+			>
+				<template #left-icon>
+					<Icon name="search" :size="17" />
+				</template>
+				<template #right-icon>
+					<button
+						v-if="keyword"
+						type="button"
+						class="search-clear"
+						aria-label="Clear search"
+						@click.stop="clearSearch"
+					>
+						<Icon name="x" :size="15" />
+					</button>
+				</template>
+			</van-search>
+			<button class="go-btn" type="button" :disabled="loading" @click="reset">Go</button>
+		</section>
+
+		<van-pull-refresh v-model="refreshing" :disabled="loading" @refresh="onRefresh">
+			<van-list
+				ref="listRef"
+				v-model:loading="loading"
+				v-model:finished="finished"
+				:offset="140"
+				finished-text=""
+				@load="onLoad"
+			>
+				<div v-if="items.length" class="cards">
+					<article
+						v-for="p in items"
+						:key="p.id"
+						class="property-card"
+						role="button"
+						tabindex="0"
+						@click="edit(p)"
+						@keydown.enter="edit(p)"
+					>
+						<div class="card-stripe" :class="{ expired: isExpired(p) }"></div>
+						<div class="card-head">
+							<div class="card-title">
+								<h3>{{ p.name }}</h3>
+								<div class="badges">
+									<span class="chip blue">{{ periodLabel(p.pay_period) }}</span>
+									<span v-if="isExpired(p)" class="chip red">Expired</span>
+								</div>
+							</div>
+							<div v-if="p.rent_amount !== null && p.rent_amount !== undefined && p.rent_amount !== ''" class="rent-block">
+								<span class="currency">฿</span>
+								<strong>{{ money(p.rent_amount) }}</strong>
+							</div>
+							<div v-else class="rent-block empty-rent">
+								<span class="currency">฿</span>
+								<strong>—</strong>
+							</div>
+						</div>
+
+						<div class="info-list">
+							<div class="info-row">
+								<Icon name="calendar" :size="14" />
+								<span class="info-label">Lease</span>
+								<span class="info-value">{{ p.rent_start || '—' }} <span class="arrow">→</span> {{ p.rent_end || '—' }}</span>
+							</div>
+							<div class="info-row">
+								<Icon name="bell" :size="14" />
+								<span class="info-label">Reminder</span>
+								<span class="info-value">{{ periodLabel(p.pay_period) }} · day {{ p.remind_day || 1 }}</span>
+							</div>
+							<div v-if="p.group_id" class="info-row group-row">
+								<Icon name="chat" :size="14" />
+								<span class="info-label">Group</span>
+								<span class="info-value mono group-id" :title="p.group_id">{{ p.group_id }}</span>
+							</div>
+							<div v-if="p.line_bot_name" class="info-row">
+								<Icon name="bot" :size="14" />
+								<span class="info-label">Line bot</span>
+								<span class="info-value ellipsis">{{ p.line_bot_name }}</span>
+							</div>
+						</div>
+
+						<div class="card-foot">
+							<div class="owner">
+								<span class="owner-avatar">{{ initial(p.owner_name) }}</span>
+								<span class="ellipsis">{{ p.owner_name || 'Unassigned' }}</span>
+							</div>
+							<div class="card-actions">
+								<button class="mini-btn" type="button" @click.stop="edit(p)">
+									<Icon name="pencil" :size="13" />
+									Edit
+								</button>
+								<button
+									class="mini-btn danger"
+									type="button"
+									:disabled="deletingId === p.id"
+									@click.stop="askDelete(p)"
+								>
+									<van-loading v-if="deletingId === p.id" size="12" color="#F56C6C" />
+									<Icon v-else name="trash" :size="13" />
+									Delete
+								</button>
+							</div>
+						</div>
+					</article>
+				</div>
+
+				<div v-else-if="loading" class="cards" aria-label="Loading properties">
+					<div v-for="n in 3" :key="n" class="skeleton-card">
+						<div class="skeleton-line w40"></div>
+						<div class="skeleton-line w70"></div>
+						<div class="skeleton-line w55"></div>
+						<div class="skeleton-line w85"></div>
+					</div>
+				</div>
+
+				<div v-else-if="finished" class="empty-state">
+					<div class="empty-icon"><Icon :name="keyword ? 'search' : 'building'" :size="26" /></div>
+					<h3>{{ keyword ? 'No matching properties' : 'No properties yet' }}</h3>
+					<p>
+						{{
+							keyword
+								? 'Try another room name, owner or group ID.'
+								: 'Add your first room to track rent, lease dates and reminders.'
+						}}
+					</p>
+					<button v-if="keyword" class="btn-ghost" type="button" @click="clearSearch">Clear search</button>
+					<button v-else class="btn-primary empty-cta" type="button" @click="create">
+						<Icon name="plus" :size="17" />
+						Add property
+					</button>
+				</div>
+			</van-list>
+		</van-pull-refresh>
+
+		<button class="fab" type="button" @click="create">
+			<Icon name="plus" :size="20" />
+			<span>Add property</span>
+		</button>
+
+		<van-action-sheet
+			v-model:show="accountVisible"
+			:actions="accountActions"
+			:description="accountDescription"
+			cancel-text="Cancel"
+			@select="onAccountAction"
+		/>
+	</div>
+</template>
+
+<script setup lang="ts">
+import { computed, nextTick, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { showConfirmDialog, showFailToast, showSuccessToast } from 'vant';
+import { deleteProperty, listProperties } from '@/api/property';
+import { useAuthStore } from '@/stores/auth';
+import { errorMessage } from '@/utils/errors';
+import BrandMark from '@/components/BrandMark.vue';
+import Icon from '@/components/Icon.vue';
+
+const router = useRouter();
+const auth = useAuthStore();
+
+const items = ref<any[]>([]);
+const total = ref(0);
+const page = ref(1);
+const keyword = ref('');
+const deletingId = ref<number | string | null>(null);
+const loading = ref(false);
+const finished = ref(false);
+const refreshing = ref(false);
+const listRef = ref<any>(null);
+const accountVisible = ref(false);
+
+const pageSize = 10;
+let requestSeq = 0;
+
+const PERIOD_LABELS: Record<string, string> = {
+	Monthly: 'Monthly',
+	Quarterly: 'Quarterly',
+	HalfYear: 'Half year',
+	Yearly: 'Yearly',
+};
+
+const accountActions = [{ name: 'Sign out', color: '#F56C6C' }];
+
+const accountDescription = computed(() => {
+	const name = auth.user?.name || auth.user?.username || auth.displayName;
+	const tenant = auth.user?.tenant_name;
+	return tenant ? `${name} · ${tenant}` : name;
+});
+
+function periodLabel(value: string) {
+	return PERIOD_LABELS[value] || value || 'Monthly';
+}
+
+function money(value: number | string) {
+	const number = Number(value);
+	return Number.isFinite(number) ? number.toLocaleString('en-US') : '—';
+}
+
+function initial(name?: string) {
+	return (name || 'U').trim().charAt(0).toUpperCase();
+}
+
+function isExpired(property: any) {
+	if (!property?.rent_end) return false;
+	const end = new Date(`${String(property.rent_end).slice(0, 10)}T23:59:59`);
+	if (Number.isNaN(end.getTime())) return false;
+	return end.getTime() < new Date(new Date().toDateString()).getTime();
+}
+
+async function onLoad() {
+	const seq = ++requestSeq;
+	const currentPage = page.value;
+	try {
+		const res: any = await listProperties({
+			page: currentPage,
+			limit: pageSize,
+			name: keyword.value.trim(),
+		});
+		if (seq !== requestSeq) return;
+		const data = Array.isArray(res.data) ? res.data : [];
+		items.value = currentPage === 1 ? data : items.value.concat(data);
+		total.value = Number(res.total || 0);
+		page.value = currentPage + 1;
+		finished.value = !res.is_next || data.length === 0;
+	} catch (err) {
+		if (seq === requestSeq) {
+			finished.value = true;
+			showFailToast(errorMessage(err, 'Could not load properties'));
+		}
+	} finally {
+		if (seq === requestSeq) loading.value = false;
+	}
+}
+
+function reset() {
+	requestSeq += 1;
+	page.value = 1;
+	total.value = 0;
+	items.value = [];
+	finished.value = false;
+	loading.value = false;
+	nextTick(() => listRef.value?.check());
+}
+
+async function onRefresh() {
+	refreshing.value = true;
+	requestSeq += 1;
+	page.value = 1;
+	finished.value = false;
+	loading.value = true;
+	try {
+		await onLoad();
+	} finally {
+		refreshing.value = false;
+	}
+}
+
+function clearSearch() {
+	keyword.value = '';
+	reset();
+}
+
+function create() {
+	router.push({ name: 'property-create' });
+}
+
+function edit(property: any) {
+	router.push({ name: 'property-edit', params: { id: property.id } });
+}
+
+async function askDelete(property: any) {
+	try {
+		await showConfirmDialog({
+			title: 'Delete property?',
+			message: `"${property.name}" and its reminders and files will be permanently removed.`,
+			confirmButtonText: 'Delete',
+			confirmButtonColor: '#F56C6C',
+		});
+	} catch {
+		return;
+	}
+
+	deletingId.value = property.id;
+	try {
+		await deleteProperty(property.id);
+		items.value = items.value.filter((item) => item.id !== property.id);
+		total.value = Math.max(0, total.value - 1);
+		showSuccessToast('Property deleted');
+		if (items.value.length === 0) reset();
+	} catch (err) {
+		showFailToast(errorMessage(err, 'Delete failed'));
+	} finally {
+		deletingId.value = null;
+	}
+}
+
+function onAccountAction(action: { name: string }) {
+	accountVisible.value = false;
+	if (action.name === 'Sign out') {
+		auth.signOut();
+		router.replace({ name: 'login' });
+	}
+}
+
+</script>
+
+<style scoped>
+.property-page {
+	padding-bottom: calc(105px + env(safe-area-inset-bottom));
+}
+
+.topbar {
+	position: sticky;
+	top: 0;
+	z-index: 12;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: calc(14px + env(safe-area-inset-top)) 18px 12px;
+	background: rgba(31, 31, 31, 0.88);
+	border-bottom: 1px solid rgba(42, 42, 42, 0.65);
+	backdrop-filter: blur(16px);
+}
+
+.brand-mini {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+}
+
+.brand-mini span {
+	color: var(--pn-text-strong);
+	font-size: 16px;
+	font-weight: 500;
+	letter-spacing: -0.3px;
+}
+
+.brand-mini b {
+	color: var(--pn-accent);
+	font-weight: 600;
+}
+
+.account-btn {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 3px 7px 3px 3px;
+	border: 1px solid var(--pn-border);
+	border-radius: 999px;
+	background: var(--pn-card);
+	color: var(--pn-muted);
+	transition:
+		border-color 180ms ease,
+		background 180ms ease;
+}
+
+.account-btn:hover {
+	border-color: var(--pn-border-strong);
+	background: var(--pn-card-2);
+}
+
+.account-avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #4aa6ff, #2b7fd9);
+	color: #fff;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.page-head {
+	padding: 22px 18px 4px;
+}
+
+.eyebrow {
+	margin-bottom: 7px;
+	color: #8dc5ff;
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: 1.5px;
+}
+
+.page-head h1 {
+	color: var(--pn-text-strong);
+	font-size: 25px;
+	font-weight: 600;
+	letter-spacing: -0.8px;
+	line-height: 1.18;
+}
+
+.subtitle {
+	margin-top: 7px;
+	color: var(--pn-muted);
+	font-size: 12px;
+}
+
+.subtitle strong {
+	color: var(--pn-text);
+	font-weight: 600;
+}
+
+.search-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 15px 18px 11px;
+}
+
+.search-row :deep(.van-search) {
+	flex: 1;
+	min-width: 0;
+}
+
+.search-row :deep(.van-search__content) {
+	min-height: 44px;
+	align-items: center;
+	padding-left: 13px;
+	padding-right: 6px;
+}
+
+.search-row :deep(.van-field__left-icon) {
+	display: flex;
+	align-items: center;
+	height: 34px;
+}
+
+.search-row :deep(.van-field__left-icon svg) {
+	display: block;
+}
+
+.search-row :deep(.van-search__field) {
+	font-size: 13px;
+}
+
+.search-clear {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--pn-faint);
+	transition:
+		color 180ms ease,
+		background 180ms ease;
+}
+
+.search-clear:hover {
+	color: var(--pn-text);
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.go-btn {
+	flex: 0 0 auto;
+	height: 44px;
+	padding: 0 15px;
+	border: 1px solid var(--pn-primary);
+	border-radius: 12px;
+	background: rgba(64, 158, 255, 0.14);
+	color: var(--pn-primary);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.2px;
+	transition:
+		border-color 180ms ease,
+		background 180ms ease,
+		color 180ms ease;
+}
+
+.go-btn:hover:not(:disabled) {
+	background: rgba(64, 158, 255, 0.22);
+}
+
+.go-btn:disabled {
+	opacity: 0.55;
+}
+
+.cards {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 5px 18px 0;
+}
+
+.property-card {
+	position: relative;
+	overflow: hidden;
+	padding: 15px 15px 13px;
+	border: 1px solid var(--pn-border);
+	border-radius: 16px;
+	background: linear-gradient(160deg, #1d1d1f 0%, var(--pn-card) 55%);
+	box-shadow: var(--pn-shadow-md);
+	transition:
+		border-color 180ms ease,
+		background 180ms ease,
+		transform 180ms ease;
+}
+
+.property-card:hover {
+	border-color: #363636;
+	background: linear-gradient(160deg, #222 0%, #1c1c1e 55%);
+}
+
+.property-card:active {
+	transform: scale(0.995);
+}
+
+.card-stripe {
+	position: absolute;
+	top: 16px;
+	left: 0;
+	width: 3px;
+	height: 34px;
+	border-radius: 0 4px 4px 0;
+	background: var(--pn-primary);
+}
+
+.card-stripe.expired {
+	background: var(--pn-danger);
+}
+
+.card-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	padding-left: 3px;
+}
+
+.card-title {
+	min-width: 0;
+}
+
+.card-title h3 {
+	overflow: hidden;
+	color: var(--pn-text-strong);
+	font-size: 15.5px;
+	font-weight: 600;
+	letter-spacing: -0.2px;
+	line-height: 1.32;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+	margin-top: 7px;
+}
+
+.rent-block {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: baseline;
+	gap: 1px;
+	padding-top: 1px;
+	color: var(--pn-text-strong);
+	font-variant-numeric: tabular-nums;
+}
+
+.rent-block .currency {
+	color: var(--pn-muted);
+	font-size: 11px;
+	font-weight: 500;
+}
+
+.rent-block strong {
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.4px;
+}
+
+.rent-block.empty-rent strong {
+	color: var(--pn-faint);
+}
+
+.info-list {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	padding: 12px 0 11px;
+	margin-top: 12px;
+	border-top: 1px solid rgba(255, 255, 255, 0.055);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.info-row {
+	display: grid;
+	grid-template-columns: 15px 60px minmax(0, 1fr);
+	align-items: center;
+	gap: 7px;
+	color: var(--pn-muted);
+	font-size: 11.5px;
+	line-height: 1.35;
+}
+
+.info-row :deep(.icon) {
+	color: #787b7f;
+}
+
+.info-label {
+	color: var(--pn-faint);
+}
+
+.info-value {
+	min-width: 0;
+	color: var(--pn-text);
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.info-value .arrow {
+	color: #64676b;
+}
+
+.info-row.group-row {
+	align-items: flex-start;
+}
+
+.info-row.group-row :deep(.icon) {
+	margin-top: 1px;
+}
+
+.group-id {
+	font-size: 9.5px;
+	line-height: 1.4;
+	letter-spacing: -0.1px;
+	overflow-wrap: anywhere;
+	word-break: break-all;
+}
+
+.ellipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.card-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding-top: 11px;
+}
+
+.owner {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	min-width: 0;
+	color: var(--pn-muted);
+	font-size: 11.5px;
+}
+
+.owner-avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 22px;
+	height: 22px;
+	border: 1px solid #333;
+	border-radius: 50%;
+	background: #262628;
+	color: #b9bcc0;
+	font-size: 9.5px;
+	font-weight: 600;
+}
+
+.card-actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex: 0 0 auto;
+}
+
+.mini-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	min-height: 31px;
+	padding: 0 9px;
+	border: 1px solid #303030;
+	border-radius: 8px;
+	background: #232325;
+	color: #b9bcc0;
+	font-size: 10.5px;
+	font-weight: 500;
+	transition:
+		border-color 180ms ease,
+		background 180ms ease,
+		color 180ms ease;
+}
+
+.mini-btn:hover {
+	border-color: #414141;
+	background: #2a2a2c;
+	color: var(--pn-text);
+}
+
+.mini-btn.danger {
+	border-color: rgba(245, 108, 108, 0.24);
+	background: rgba(245, 108, 108, 0.06);
+	color: #ff9d9d;
+}
+
+.mini-btn.danger:hover {
+	background: rgba(245, 108, 108, 0.12);
+}
+
+.mini-btn:disabled {
+	opacity: 0.6;
+}
+
+.skeleton-card {
+	padding: 17px 15px;
+	border: 1px solid var(--pn-border);
+	border-radius: 16px;
+	background: var(--pn-card);
+}
+
+.skeleton-line {
+	height: 11px;
+	margin-top: 11px;
+	border-radius: 6px;
+	background: linear-gradient(90deg, #252527 25%, #2d2d30 50%, #252527 75%);
+	background-size: 200% 100%;
+	animation: shimmer 1.4s infinite;
+}
+
+.skeleton-line:first-child {
+	margin-top: 0;
+}
+
+.w40 {
+	width: 40%;
+	height: 15px;
+}
+
+.w70 {
+	width: 70%;
+}
+
+.w55 {
+	width: 55%;
+}
+
+.w85 {
+	width: 85%;
+}
+
+@keyframes shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 54px 26px 30px;
+	text-align: center;
+}
+
+.empty-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 58px;
+	height: 58px;
+	margin-bottom: 16px;
+	border: 1px solid var(--pn-border);
+	border-radius: 18px;
+	background: var(--pn-card);
+	color: var(--pn-muted);
+}
+
+.empty-state h3 {
+	color: var(--pn-text-strong);
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.empty-state p {
+	max-width: 280px;
+	margin: 7px 0 18px;
+	color: var(--pn-muted);
+	font-size: 12.5px;
+	line-height: 1.6;
+}
+
+.empty-cta {
+	width: auto;
+	min-height: 44px;
+	padding: 0 20px;
+}
+
+.fab {
+	position: fixed;
+	right: max(18px, calc((100vw - 560px) / 2 + 18px));
+	bottom: calc(20px + env(safe-area-inset-bottom));
+	z-index: 20;
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	height: 50px;
+	padding: 0 18px;
+	border: 0;
+	border-radius: 999px;
+	background: linear-gradient(180deg, #4aa6ff, var(--pn-primary));
+	color: #fff;
+	font-size: 13px;
+	font-weight: 600;
+	box-shadow: 0 12px 30px rgba(64, 158, 255, 0.32);
+	transition:
+		transform 180ms ease,
+		box-shadow 180ms ease;
+}
+
+.fab:hover {
+	box-shadow: 0 14px 34px rgba(64, 158, 255, 0.4);
+}
+
+.fab:active {
+	transform: scale(0.97);
+}
+
+@media (max-width: 360px) {
+	.info-row {
+		grid-template-columns: 15px 54px minmax(0, 1fr);
+		font-size: 11px;
+	}
+
+	.card-title h3 {
+		font-size: 14.5px;
+	}
+
+	.rent-block strong {
+		font-size: 16px;
+	}
+
+	.mini-btn {
+		padding: 0 7px;
+	}
+}
+</style>

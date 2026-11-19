@@ -1,0 +1,31 @@
+export default {
+    message: {
+        pages: {
+            aiAssist: {
+                title: 'AI 助手 · 一句话添加房源',
+                placeholder: '例如：我要加一个房源，月付，房租6500泰铢，租期从2026年10月1号到2027年10月1号，提醒每月5号，负责人张三',
+                hint: '支持中/英/泰混说；AI 只负责帮你填表，确认后才会保存',
+                loading: 'AI 解析中…',
+                parse: 'AI 解析',
+                previewTitle: '解析结果（确认后可保存）',
+                missing: '缺少：{items}，请在下方补全',
+                roomName: '房间名称',
+                roomNamePlaceholder: '如 A1 阳光单间',
+                rentAmount: '月租金(฿)',
+                payPeriod: '付租周期',
+                remindDay: '提醒日',
+                rentStart: '起租日期',
+                rentEnd: '结束日期',
+                memo: '备注',
+                confirm: '确认并创建',
+                cancel: '取消',
+                parseFail: '解析失败，请稍后重试',
+                parseError: 'AI 解析出错',
+                nameRequired: '请填写房间名称',
+                datesRequired: '请填写起租/结束日期',
+                created: '房源已创建',
+                createFail: '创建失败',
+            },
+        },
+    },
+};

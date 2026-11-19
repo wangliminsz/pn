@@ -1,0 +1,19 @@
+export default {
+    message: {
+        pages: {
+            consoleLayout: {
+                menu: {
+                    dashboard: 'Overview',
+                    tenant: 'Tenants',
+                    lineBot: 'LineBot',
+                    superadmin: 'Superadmin',
+                    personal: 'Profile',
+                },
+                foot: 'proNotify · Admin Console',
+                changePwd: 'Change Password',
+                logout: 'Sign Out',
+                defaultUser: 'Admin',
+            },
+        },
+    },
+};

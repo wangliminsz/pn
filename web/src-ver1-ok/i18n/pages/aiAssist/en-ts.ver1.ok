@@ -1,0 +1,31 @@
+export default {
+    message: {
+        pages: {
+            aiAssist: {
+                title: 'AI Assistant · Add a property in one sentence',
+                placeholder: 'e.g. Add a property, monthly, rent 6500 THB, lease from 2026-10-01 to 2027-10-01, remind on the 5th',
+                hint: 'Supports mixed ZH/EN/TH; AI only fills the form, saved only after you confirm',
+                loading: 'AI parsing…',
+                parse: 'AI Parse',
+                previewTitle: 'Parsed result (confirm to save)',
+                missing: 'Missing: {items}, please fill in below',
+                roomName: 'Room Name',
+                roomNamePlaceholder: 'e.g. A1 sunny single room',
+                rentAmount: 'Monthly Rent (฿)',
+                payPeriod: 'Pay Period',
+                remindDay: 'Remind Day',
+                rentStart: 'Rent Start',
+                rentEnd: 'Rent End',
+                memo: 'Memo',
+                confirm: 'Confirm & Create',
+                cancel: 'Cancel',
+                parseFail: 'Parse failed, please retry later',
+                parseError: 'AI parse error',
+                nameRequired: 'Please enter the room name',
+                datesRequired: 'Please enter the rent start / end dates',
+                created: 'Property created',
+                createFail: 'Create failed',
+            },
+        },
+    },
+};

@@ -1,0 +1,56 @@
+export default {
+    message: {
+        pages: {
+            linebot: {
+                buttons: {
+                    view: 'View',
+                    edit: 'Edit',
+                    delete: 'Delete',
+                },
+                table: {
+                    columns: {
+                        index: 'No.',
+                        name: 'Bot Name',
+                        botCode: 'Bot Code',
+                        channelId: 'Channel ID',
+                        basicId: 'Basic ID',
+                        botUserId: 'Bot User Id',
+                        tenant: 'Tenant',
+                        channelSecret: 'Channel Secret',
+                        channelAccessToken: 'Channel Access Token',
+                        isDefault: 'Default Bot',
+                        isActive: 'Active',
+                        monthlyQuota: 'Monthly Quota',
+                    },
+                    placeholder: {
+                        monthlyQuota: 'Leave empty to use global config',
+                    },
+                },
+                validation: {
+                    nameRequired: 'Please enter the bot name',
+                    botCodeRequired: 'Please enter the bot code',
+                },
+                title: 'Available LineBot',
+                count: '{n} bots',
+                note: 'Push bots of this company (read-only; credentials are managed by the platform)',
+                refreshAll: 'Refresh All',
+                empty: 'Your company has no LineBot yet. Please contact the platform to enable one.',
+                platformDefault: 'Platform Default',
+                enabled: 'Enabled',
+                disabled: 'Disabled',
+                monthlyQuotaShort: 'Monthly Quota',
+                refreshQuota: 'Refresh quota',
+                credentials: 'Credentials',
+                secretSet: 'Secret set (last 4: {tail})',
+                secretNotSet: 'Secret not set',
+                tokenSet: 'Token set (last 4: {tail})',
+                tokenNotSet: 'Token not set',
+                refreshSuccess: 'Refreshed {name} quota',
+                refreshFailNetwork: 'Cannot connect to LINE (network unreachable / proxy not enabled), {name} quota unavailable',
+                refreshFail: 'Cannot connect to LINE (network unreachable), refresh failed',
+                refreshAllDone: 'Refreshed all {n} bot quotas',
+                refreshAllPartial: 'Refresh complete: {ok} succeeded, {fail} failed ({names}) cannot connect to LINE, quota unavailable',
+            },
+        },
+    },
+};

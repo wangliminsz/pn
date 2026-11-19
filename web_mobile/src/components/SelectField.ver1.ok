@@ -1,0 +1,110 @@
+<template>
+	<van-field
+		:model-value="displayText"
+		:label="label"
+		:placeholder="placeholder"
+		readonly
+		is-link
+		@click="open"
+	>
+		<template #right-icon>
+			<button
+				v-if="clearable && modelValue !== null && modelValue !== undefined && modelValue !== ''"
+				type="button"
+				class="clear-btn"
+				aria-label="Clear selection"
+				@click.stop="clear"
+			>
+				<Icon name="x" :size="14" />
+			</button>
+		</template>
+	</van-field>
+
+	<van-popup v-model:show="visible" position="bottom" round teleport="body">
+		<van-picker
+			:title="label"
+			:columns="columns"
+			:model-value="pickerValue"
+			@confirm="onConfirm"
+			@cancel="visible = false"
+		/>
+	</van-popup>
+</template>
+
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import Icon from './Icon.vue';
+
+interface SelectOption {
+	label: string;
+	value: string | number;
+}
+
+const props = withDefaults(
+	defineProps<{
+		modelValue?: string | number | null;
+		label: string;
+		placeholder?: string;
+		options: SelectOption[];
+		clearable?: boolean;
+	}>(),
+	{
+		modelValue: null,
+		placeholder: 'Select',
+		clearable: true,
+	},
+);
+
+const emit = defineEmits<{
+	'update:modelValue': [value: string | number | null];
+}>();
+
+const visible = ref(false);
+
+const columns = computed(() => props.options.map((option) => ({ text: option.label, value: option.value })));
+
+const displayText = computed(() => {
+	const found = props.options.find((option) => option.value === props.modelValue);
+	return found?.label || '';
+});
+
+const pickerValue = computed(() => {
+	const found = columns.value.find((option) => option.value === props.modelValue);
+	return found ? [found.value] : [];
+});
+
+function open() {
+	visible.value = true;
+}
+
+function clear() {
+	emit('update:modelValue', null);
+}
+
+function onConfirm({ selectedOptions }: { selectedOptions: Array<{ text?: string; value?: string | number }> }) {
+	const picked = selectedOptions?.[0];
+	emit('update:modelValue', picked?.value ?? null);
+	visible.value = false;
+}
+</script>
+
+<style scoped>
+.clear-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	margin-right: 2px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: #2a2a2a;
+	color: var(--pn-muted);
+}
+
+.clear-btn:hover {
+	color: var(--pn-text);
+	background: #343434;
+}
+</style>

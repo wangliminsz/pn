@@ -1,0 +1,31 @@
+export default {
+    message: {
+        pages: {
+            payment: {
+                title: '续费支付',
+                sub: 'Pay with Omise PromptPay · 支付后到期时间自动顺延一年',
+                loading: '加载中…',
+                gatewayDisabled: '支付网关未启用，请联系管理员。',
+                backToWorkbench: '返回工作台',
+                successTitle: '支付成功，续费完成',
+                successSub: '已为你顺延 {days}，续费后可使用到 {time}',
+                successSubDim: 'Line 推送配额已恢复（租户已重新启用）',
+                failTitle: '支付已超时/失败',
+                failSub: '未在限定时间内完成支付，该笔二维码已作废',
+                regenerate: '重新生成付款码',
+                amountLabel: '续费金额',
+                unit: 'THB / {days} 天',
+                timeLeft: '剩余支付时间',
+                generatingQr: '正在生成二维码…',
+                qrTip: '使用银行 App / Line Pay 扫描 PromptPay 二维码完成付款',
+                waitingConfirm: '我已转账，请等待确认…',
+                qrGenerated: '二维码已生成，请使用银行 App 扫码支付',
+                createFailed: '创建失败',
+                createPaymentFailed: '创建支付失败',
+                simulateSuccess: '模拟支付成功',
+                simulateFailed: '模拟失败',
+                simulateRequestFailed: '模拟请求失败',
+            },
+        },
+    },
+};

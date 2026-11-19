@@ -1,0 +1,415 @@
+/* 深色模式样式
+------------------------------- */
+[data-theme='dark'] {
+	// 变量(自定义时，只需修改这里的值)
+	--next-bg-main: #1f1f1f;
+	--next-color-white: #ffffff;
+	--next-color-disabled: #191919;
+	--next-color-bar: #dadada;
+	--next-color-primary: #303030;
+	--next-border-color: #424242;
+	--next-border-black: #333333;
+	--next-border-columns: #2a2a2a;
+	--next-color-seting: #505050;
+	--next-text-color-regular: #b1b4b8;
+	--next-text-color-placeholder: #8f9297;
+	--next-color-hover: #3c3c3c;
+	--next-color-hover-rgba: rgba(0, 0, 0, 0.3);
+
+	// root
+	--next-bg-main-color: var(--next-bg-main) !important;
+	--next-bg-topBar: var(--next-color-disabled) !important;
+	--next-bg-topBarColor: var(--next-color-bar) !important;
+	--next-bg-menuBar: var(--next-color-disabled) !important;
+	--next-bg-menuBarColor: var(--next-color-bar) !important;
+	--next-bg-menuBarActiveColor: var(--next-color-hover-rgba) !important;
+	--next-bg-columnsMenuBar: var(--next-color-disabled) !important;
+	--next-bg-columnsMenuBarColor: var(--next-color-bar) !important;
+	--next-border-color-light: var(--next-border-black) !important;
+	--next-color-primary-lighter: var(--next-color-primary) !important;
+	--next-color-success-lighter: var(--next-color-primary) !important;
+	--next-color-warning-lighter: var(--next-color-primary) !important;
+	--next-color-danger-lighter: var(--next-color-primary) !important;
+	--next-bg-color: var(--next-color-primary) !important;
+	--next-color-dark-hover: var(--next-color-hover) !important;
+	--next-color-menu-hover: var(--next-color-hover-rgba) !important;
+	--next-color-user-hover: var(--next-color-hover-rgba) !important;
+	--next-color-seting-main: var(--next-color-seting) !important;
+	--next-color-seting-aside: var(--next-color-hover) !important;
+	--next-color-seting-header: var(--next-color-primary) !important;
+
+	// element plus
+	--el-color-white: var(--next-color-disabled) !important;
+	--el-text-color-primary: var(--next-color-bar) !important;
+	// 深色下把主色调亮，避免深藏青在深色背景上看不清(覆盖旧缓存内联变量)
+	--el-color-primary: #409eff !important;
+	--el-color-primary-light-1: #58a6ff !important;
+	--el-color-primary-light-2: #70b1ff !important;
+	--el-color-primary-light-3: #79bbff !important;
+	--el-color-primary-light-4: #90c6ff !important;
+	--el-color-primary-light-5: #a0cfff !important;
+	--el-color-primary-light-6: #b1d9ff !important;
+	--el-color-primary-light-7: #c6e2ff !important;
+	--el-color-primary-light-8: #d9ecff !important;
+	--el-color-primary-light-9: #ecf5ff !important;
+	--el-color-primary-dark-2: #337ecc !important;
+	--el-border-color: var(--next-border-black) !important;
+	--el-border-color-light: var(--next-border-black) !important;
+	--el-border-color-lighter: var(--next-border-black) !important;
+	--el-border-color-extra-light: var(--el-color-primary-light-8) !important;
+	--el-text-color-regular: var(--next-text-color-regular) !important;
+	--el-bg-color: var(--next-color-disabled) !important;
+	--el-color-primary-light-9: var(--next-color-hover) !important;
+	--el-text-color-disabled: var(--next-text-color-placeholder) !important;
+	--el-text-color-disabled-base: var(--el-color-primary) !important;
+	--el-text-color-placeholder: var(--next-text-color-placeholder) !important;
+	--el-disabled-bg-color: var(--next-color-disabled) !important;
+	--el-fill-base: var(--next-color-white) !important;
+	--el-fill-colo: var(--next-color-hover-rgba) !important;
+	--el-fill-color: var(--next-color-hover-rgba) !important;
+	--el-fill-color-blank: var(--next-color-disabled) !important;
+	--el-fill-color-light: var(--next-color-hover-rgba) !important;
+	--el-bg-color-overlay: var(--el-color-primary-light-9) !important;
+	--el-mask-color: rgb(42 42 42 / 80%);
+	--el-fill-color-lighter: var(--next-color-hover-rgba) !important;
+
+	// button
+	.el-button {
+		&:hover {
+			border-color: var(--next-border-color) !important;
+		}
+	}
+	.el-button--primary,
+	.el-button--info,
+	.el-button--danger,
+	.el-button--success,
+	.el-button--warning {
+		--el-button-text-color: var(--next-color-white) !important;
+		--el-button-hover-text-color: var(--next-color-white) !important;
+		--el-button-disabled-text-color: var(--next-color-white) !important;
+		&:hover {
+			border-color: var(--el-button-hover-border-color, var(--el-button-hover-bg-color)) !important;
+		}
+	}
+
+	// drawer
+	.el-divider__text {
+		background-color: var(--el-color-white) !important;
+	}
+	.el-drawer {
+		border-left: 1px solid var(--next-border-color-light) !important;
+	}
+
+	// tabs
+	.el-tabs--border-card {
+		background-color: var(--el-color-white) !important;
+	}
+	.el-tabs--border-card > .el-tabs__header .el-tabs__item.is-active {
+		background: var(--next-color-primary-lighter);
+	}
+
+	// alert / notice-bar
+	.home-card-item {
+		border: 1px solid var(--next-border-color-light) !important;
+	}
+	.el-alert,
+	.notice-bar {
+		border: 1px solid var(--next-border-color) !important;
+		background-color: var(--next-color-disabled) !important;
+	}
+
+	// menu
+	.layout-aside {
+		border-right: 1px solid var(--next-border-color-light) !important;
+	}
+
+	// colorPicker
+	.el-color-picker__mask {
+		background: unset !important;
+	}
+	.el-color-picker__trigger {
+		border: 1px solid var(--next-border-color-light) !important;
+	}
+
+	// popper / dropdown
+	.el-popper {
+		border: 1px solid var(--next-border-color) !important;
+		color: var(--el-text-color-primary) !important;
+		.el-popper__arrow:before {
+			background: var(--el-color-white) !important;
+			border: 1px solid var(--next-border-color);
+		}
+		a {
+			color: var(--el-text-color-primary) !important;
+		}
+	}
+	.el-popper,
+	.el-dropdown-menu {
+		background: var(--el-color-white) !important;
+	}
+	.el-dropdown-menu__item:hover:not(.is-disabled) {
+		background: var(--el-bg-color) !important;
+	}
+	.el-dropdown-menu__item.is-disabled {
+		font-weight: 700 !important;
+	}
+
+	// input
+	.el-input-group__append,
+	.el-input-group__prepend {
+		border: var(--el-input-border) !important;
+		border-right: none !important;
+		background: var(--next-color-disabled) !important;
+		border-left: 0 !important;
+	}
+	.el-input-number__decrease,
+	.el-input-number__increase {
+		background: var(--next-color-disabled) !important;
+	}
+
+	// tag
+	.el-select .el-select__tags .el-tag,
+	.el-select__selection .el-tag {
+		--el-tag-bg-color: rgba(64, 158, 255, 0.18) !important;
+		--el-tag-border-color: rgba(64, 158, 255, 0.35) !important;
+		--el-tag-text-color: #9ec9ff !important;
+	}
+
+	// pagination
+	.el-pagination.is-background .el-pager li:not(.disabled).active {
+		color: var(--next-color-white) !important;
+	}
+	.el-pagination.is-background .btn-next,
+	.el-pagination.is-background .btn-prev,
+	.el-pagination.is-background .el-pager li {
+		background-color: var(--next-bg-color);
+	}
+	/*深色模式时分页高亮问题*/
+	.el-pagination.is-background .btn-next.is-active,
+	.el-pagination.is-background .btn-prev.is-active,
+	.el-pagination.is-background .el-pager li.is-active {
+		color: var(--next-color-white) !important;
+	}
+
+	// radio
+	.el-radio-button:not(.is-active) .el-radio-button__inner {
+		border: 1px solid var(--next-border-color-light) !important;
+		border-left: 0 !important;
+	}
+	.el-radio-button.is-active .el-radio-button__inner {
+		color: var(--next-color-white) !important;
+	}
+
+	// countup
+	.countup-card-item-flex {
+		color: var(--el-text-color-primary) !important;
+	}
+
+	// editor
+	.editor-container {
+		.w-e-toolbar {
+			background: var(--el-color-white) !important;
+			border: 1px solid var(--next-border-color-light) !important;
+			.w-e-menu:hover {
+				background: var(--next-color-user-hover) !important;
+				i {
+					color: var(--el-text-color-primary) !important;
+				}
+			}
+		}
+		.w-e-text-container {
+			border: 1px solid var(--next-border-color-light) !important;
+			border-top: none !important;
+			.w-e-text {
+				background: var(--el-color-white) !important;
+			}
+		}
+	}
+
+	// date-picker
+	.el-picker-panel {
+		background: var(--el-color-white) !important;
+	}
+
+	// dialog
+	.el-dialog {
+		border: 1px solid var(--el-border-color-lighter);
+		.el-dialog__header {
+			color: var(--el-text-color-primary) !important;
+		}
+	}
+
+	// columns
+	.layout-columns-aside ul .layout-columns-active {
+		color: var(--next-color-white) !important;
+	}
+	.layout-columns-aside {
+		border-right: 1px solid var(--next-border-columns);
+	}
+
+	// tagsView
+	.tags-style-one {
+		.is-active {
+			color: var(--el-text-color-primary) !important;
+		}
+		.layout-navbars-tagsview-ul-li:hover {
+			border-color: var(--el-border-color-lighter) !important;
+		}
+	}
+
+	// loading
+	.el-loading-mask {
+		background-color: var(--next-bg-main) !important;
+	}
+
+	// message / toast 柔和化（低饱和深色，避免白底刺眼）
+	.el-message {
+		border-radius: 10px !important;
+		padding: 12px 16px !important;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+
+		.el-message__content {
+			font-size: 13px !important;
+			overflow-wrap: break-word;
+		}
+		.el-message__closeBtn,
+		.el-message__close-btn {
+			color: var(--next-text-color-placeholder) !important;
+		}
+	}
+	.el-message--primary {
+		--el-message-bg-color: rgba(64, 158, 255, 0.2) !important;
+		--el-message-border-color: rgba(64, 158, 255, 0.35) !important;
+		--el-message-text-color: #9ec9ff !important;
+	}
+	.el-message--success {
+		--el-message-bg-color: rgba(103, 194, 58, 0.14) !important;
+		--el-message-border-color: rgba(103, 194, 58, 0.34) !important;
+		--el-message-text-color: #93c989 !important;
+	}
+	.el-message--warning {
+		--el-message-bg-color: rgba(228, 175, 96, 0.16) !important;
+		--el-message-border-color: rgba(228, 175, 96, 0.38) !important;
+		--el-message-text-color: #c9a86a !important;
+	}
+	.el-message--error {
+		--el-message-bg-color: rgba(245, 108, 108, 0.12) !important;
+		--el-message-border-color: rgba(245, 108, 108, 0.36) !important;
+		--el-message-text-color: #f49292 !important;
+	}
+	.el-message--info {
+		--el-message-bg-color: rgba(155, 157, 161, 0.14) !important;
+		--el-message-border-color: rgba(155, 157, 161, 0.35) !important;
+		--el-message-text-color: #aeb6bd !important;
+	}
+	.el-message.is-plain {
+		background-color: #242424 !important;
+		border-color: #333333 !important;
+	}
+
+	// ---------- MessageBox 确认弹窗（重设计：深色精致，替代 ElMessageBox 默认白底呆板风） ----------
+	// 变量：圆角更大、宽度微调、阴影加深、内容颜色细化
+	.el-message-box {
+		--el-messagebox-width: 400px;
+		--el-messagebox-border-radius: 14px;
+		--el-messagebox-box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+		--el-messagebox-title-color: #eaeaea !important;
+		--el-messagebox-content-color: #b1b4b8 !important;
+		--el-messagebox-content-font-size: 13px !important;
+		--el-messagebox-font-size: 14px;
+		--el-messagebox-padding-primary: 14px;
+		background: linear-gradient(180deg, #1f1f1f 0%, #1a1a1c 100%) !important;
+		border: 1px solid #2a2a2a !important;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45) !important;
+		padding: 18px 20px 20px;
+		max-width: var(--el-messagebox-width);
+	}
+
+	// header：小标题，去掉呆板的大字号，与全站 14~15px 标题一致
+	.el-message-box__header {
+		padding-bottom: 10px;
+	}
+	.el-message-box__title {
+		font-size: 15px !important;
+		font-weight: 600 !important;
+		letter-spacing: 0.2px;
+		color: #eaeaea !important;
+	}
+
+	// 状态 icon：柔和低饱和（替代默认高亮纯色）
+	.el-message-box__status.el-message-box-icon--warning {
+		--el-messagebox-color: rgba(228, 175, 96, 0.9);
+		font-size: 22px;
+	}
+	.el-message-box__status.el-message-box-icon--error {
+		--el-messagebox-color: rgba(245, 108, 108, 0.9);
+		font-size: 22px;
+	}
+	.el-message-box__status.el-message-box-icon--info,
+	.el-message-box__status.el-message-box-icon--success {
+		font-size: 22px;
+	}
+
+	// header 关闭按钮
+	.el-message-box__headerbtn .el-message-box__close {
+		color: #8f9297 !important;
+		font-size: 15px !important;
+	}
+
+	// 正文：常规字重，避免加粗/呆板；行高舒适
+	.el-message-box__content {
+		font-weight: 400;
+		line-height: 1.55;
+	}
+	.el-message-box__message p {
+		font-weight: 400;
+		line-height: 1.55;
+	}
+
+	// 底部按钮：确认主按钮走全站柔和蓝，取消走深底描边
+	// 视觉顺序「确定 | 取消」且整体靠右。
+	// ⚠️ flex-direction:row-reverse 会让 justify-content 方向反转: flex-end→靠左, flex-start→靠右。
+	// 故想靠右必须用 flex-start!important(压过 EP 默认 flex-end)。
+	.el-message-box__btns {
+		padding-top: 16px;
+		gap: 8px;
+		flex-direction: row-reverse;
+		justify-content: flex-start !important;
+	}
+	.el-message-box__btns .el-button {
+		border-radius: 8px;
+		font-size: 13px;
+		height: 32px;
+		padding: 0 16px;
+	}
+	.el-message-box__btns .el-button--primary {
+		background: rgba(64, 158, 255, 0.2) !important;
+		border-color: rgba(64, 158, 255, 0.35) !important;
+		color: #9ec9ff !important;
+		font-weight: 500;
+		&:hover,
+		&:focus {
+			background: rgba(64, 158, 255, 0.3) !important;
+			border-color: rgba(64, 158, 255, 0.5) !important;
+			color: #bcd9ff !important;
+		}
+	}
+	.el-message-box__btns .el-button:not(.el-button--primary) {
+		background: #212121 !important;
+		border-color: #333333 !important;
+		color: #b1b4b8 !important;
+		font-weight: 400;
+		&:hover,
+		&:focus {
+			border-color: #444444 !important;
+			color: #d8dade !important;
+			background: #242424 !important;
+		}
+	}
+
+	// 遮罩：深色，保证前景对比
+	.el-overlay-message-box {
+		background-color: rgba(10, 10, 12, 0.62) !important;
+		backdrop-filter: blur(3px);
+	}
+}

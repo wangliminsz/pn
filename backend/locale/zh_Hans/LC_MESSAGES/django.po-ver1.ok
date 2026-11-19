@@ -1,0 +1,797 @@
+# Simplified Chinese translations for Django.
+# Copyright (C) 2026
+# This file is distributed under the same license as the Django project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-vue3-admin\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-31 00:00+0000\n"
+"PO-Revision-Date: 2026-03-31 00:00+0000\n"
+"Last-Translator: \n"
+"Language: zh_Hans\n"
+"Language-Team: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: django-vue3-admin i18n phase 1\n"
+
+#: dvadmin/utils/json_response.py
+msgid "error"
+msgstr "错误"
+
+#: dvadmin/utils/exception.py
+msgid "Endpoint address is incorrect"
+msgstr "接口地址不正确"
+
+msgid "Delete failed: this record has related data bindings"
+msgstr "删除失败:该条数据与其他数据有相关绑定"
+
+#: dvadmin/utils/backends.py
+msgid "This account has been disabled. Contact an administrator to unlock it."
+msgstr "当前用户已被禁用,请联系管理员!"
+
+#: dvadmin/utils/import_export.py
+msgid "Date format is incorrect"
+msgstr "日期格式不正确"
+
+#: dvadmin/utils/import_export_mixin.py
+msgid "No."
+msgstr "序号"
+
+msgid "Import"
+msgstr "导入"
+
+msgid "Template"
+msgstr "模板"
+
+msgid "Export"
+msgstr "导出"
+
+msgid "Update primary key (do not modify)"
+msgstr "更新主键(勿改)"
+
+msgid "Please configure the corresponding export template fields."
+msgstr "请配置对应的导出模板字段。"
+
+msgid "Please configure the corresponding import template fields."
+msgstr "请配置对应的导入模板字段。"
+
+msgid "Please configure the corresponding import serializer."
+msgstr "请配置对应的导入序列化器。"
+
+msgid "Please configure the corresponding export serializer."
+msgstr "请配置对应的导出序列化器。"
+
+msgid "Import successful"
+msgstr "导入成功"
+
+msgid "Data export task"
+msgstr "数据导出任务"
+
+msgid "Import task has been created. Please go to 'Download Center' to wait for download"
+msgstr "导入任务已创建,请前往'下载中心'等待下载"
+
+#: dvadmin/utils/viewset.py
+msgid "Create successful"
+msgstr "新增成功"
+
+msgid "Query successful"
+msgstr "获取成功"
+
+msgid "Update successful"
+msgstr "更新成功"
+
+msgid "Delete successful"
+msgstr "删除成功"
+
+msgid "keys field not provided"
+msgstr "未获取到keys字段"
+
+#: dvadmin/system/views/login.py
+msgid "Verification code is required"
+msgstr "验证码不能为空"
+
+msgid "Verification code has expired"
+msgstr "验证码已过期"
+
+msgid "Image verification code is incorrect"
+msgstr "图片验证码错误"
+
+msgid "The account you are logging in with does not exist"
+msgstr "您登录的账号不存在"
+
+msgid "Multiple accounts found for this login. Contact an administrator to check account uniqueness"
+msgstr "您登录的账号存在多个,请联系管理员检查登录账号唯一性"
+
+msgid "Account has been locked. Contact an administrator to unlock"
+msgstr "账号已被锁定,联系管理员解锁"
+
+msgid "Username/password incorrect. Account will be locked after {} failed attempts~"
+msgstr "账号/密码错误;重试{}次后将被锁定~"
+
+msgid "Request successful"
+msgstr "请求成功"
+
+msgid "This interface is not yet available"
+msgstr "该接口暂未开通!"
+
+msgid "Logout successful"
+msgstr "注销成功"
+
+msgid "Username/password incorrect"
+msgstr "账号/密码错误"
+
+#: dvadmin/system/views/user.py
+msgid "Username must be unique"
+msgstr "账号必须唯一"
+
+msgid "Mobile number must be unique"
+msgstr "手机号必须唯一"
+
+msgid "Enabled"
+msgstr "启用"
+
+msgid "Disabled"
+msgstr "停用"
+
+msgid "Username"
+msgstr "用户账号"
+
+msgid "Full name"
+msgstr "用户名称"
+
+msgid "Email"
+msgstr "用户邮箱"
+
+msgid "Mobile"
+msgstr "手机号码"
+
+msgid "Gender"
+msgstr "用户性别"
+
+msgid "Account status"
+msgstr "帐号状态"
+
+msgid "Last login time"
+msgstr "最后登录时间"
+
+msgid "Department name"
+msgstr "部门名称"
+
+msgid "Department head"
+msgstr "部门负责人"
+
+msgid "Login username"
+msgstr "登录账号"
+
+msgid "Department"
+msgstr "部门"
+
+msgid "Role"
+msgstr "角色"
+
+msgid "No department"
+msgstr "暂无部门"
+
+msgid "Parameters cannot be empty"
+msgstr "参数不能为空"
+
+msgid "Passwords do not match"
+msgstr "两次密码不匹配"
+
+msgid "Old password is incorrect"
+msgstr "旧密码不正确"
+
+msgid "Invalid language code"
+msgstr "无效的语言代码"
+
+msgid "Language updated successfully"
+msgstr "语言更新成功"
+
+msgid "Only super administrators can reset passwords"
+msgstr "只允许超级管理员对其进行密码重置"
+
+msgid "Password reset successful"
+msgstr "密码重置成功"
+
+msgid "User not found"
+msgstr "未获取到用户"
+
+#: dvadmin/system/views/role.py
+msgid "Permission key must be unique"
+msgstr "权限字符必须唯一"
+#: dvadmin/system/views/role.py
+msgid "Please select a role"
+msgstr "请选择角色"
+#: dvadmin/system/views/role.py
+msgid "Please select a user"
+msgstr "请选择用户"
+#: dvadmin/system/views/role.py
+msgid "Add successful"
+msgstr "添加成功"
+#: dvadmin/system/views/menu.py
+msgid "Menu does not exist"
+msgstr "菜单不存在"
+#: dvadmin/system/views/menu.py
+msgid "Move up successful"
+msgstr "上移成功"
+#: dvadmin/system/views/menu.py
+msgid "Move down successful"
+msgstr "下移成功"
+#: dvadmin/system/views/dept.py
+msgid "Department does not exist"
+msgstr "部门不存在"
+#: dvadmin/system/views/role_menu.py
+msgid "Role parameter not provided"
+msgstr "未获取到角色参数"
+#: dvadmin/system/views/role_menu.py
+msgid "Menu parameter not provided"
+msgstr "未获取到菜单参数"
+#: dvadmin/system/views/role_menu.py
+msgid "Save successful"
+msgstr "保存成功"
+#: dvadmin/system/views/system_config.py
+msgid "Variable name already exists"
+msgstr "已存在相同变量名"
+#: dvadmin/system/views/system_config.py
+msgid "Query error~"
+msgstr "查询出错了~"
+#: dvadmin/system/views/system_config.py
+msgid "Association information not found"
+msgstr "未获取到关联信息"
+#: dvadmin/system/views/menu_button.py
+msgid "Batch creation successful"
+msgstr "批量创建成功"
+#: dvadmin/system/views/menu_button.py
+msgid "Add"
+msgstr "新增"
+#: dvadmin/system/views/menu_button.py
+msgid "Edit"
+msgstr "编辑"
+#: dvadmin/system/views/menu_field.py
+msgid "Model table does not exist"
+msgstr "模型表不存在"
+#: dvadmin/system/views/menu_field.py
+msgid "Field permission for '%s' already exists and cannot be duplicated"
+msgstr "'%s' 字段权限已有，不可重复创建"
+#: dvadmin/system/views/menu_field.py
+msgid "Match successful"
+msgstr "匹配成功"
+#: dvadmin/system/views/message_center.py
+msgid "You have a new message~"
+msgstr "您有一条新消息~"
+#: dvadmin/system/views/message_center.py
+msgid "You viewed a message~"
+msgstr "您查看了一条消息~"
+
+# login security (2026-09-10)
+msgid "Multiple matching accounts found. Contact admin"
+msgstr "存在多个匹配账号，请联系管理员处理账号唯一性"
+
+msgid "Email not verified yet"
+msgstr "该账号尚未完成邮箱验证，请先通过注册邮件完成验证"
+
+msgid "Too many attempts. Retry in about {} min"
+msgstr "尝试次数过多，账号已临时锁定，请约 {} 分钟后重试"
+
+msgid "Wrong username or password. {} tries left, then locked for {} min"
+msgstr "账号或密码错误，连续失败 {} 次后将临时锁定 {} 分钟"
+
+msgid "Too many attempts. Try again later"
+msgstr "登录尝试过于频繁，请稍后再试"
+
+# signup (2026-09-11)
+msgid "Please enter a valid email address"
+msgstr "请输入有效的邮箱地址"
+
+msgid "Company name is required"
+msgstr "公司名称不能为空"
+
+msgid "Password must be at least 8 characters with letters and numbers"
+msgstr "密码至少 8 位，且须同时包含字母和数字"
+
+msgid "This email is already registered. Please sign in"
+msgstr "该邮箱已注册，请直接登录"
+
+msgid "Invalid or expired verification link"
+msgstr "验证链接无效或已过期"
+
+msgid "Verification link has expired. Please sign up again"
+msgstr "验证链接已过期，请重新注册"
+
+# 新租户开通示例房源 (2026-09-11)
+msgid "Sample Property (delete me)"
+msgstr "示例房源（可删除）"
+
+msgid "This is a sample property to help you learn how to add and configure properties. You can delete it after creating your own property."
+msgstr "这是一个示例房源，帮助你了解如何添加和配置房源。创建你自己的房源后即可删除本条。"
+
+# 组织架构导入 (2026-09-12)
+msgid "Duplicate rows for account {} with different dept/parent/tier. Keeping the first occurrence."
+msgstr "账号 {} 重复行不一致(部门/上级/职级不同)，已保留首行"
+
+# .format 后拼接(部门/职级取值)
+msgid " (dept={}, tier={})"
+msgstr "（部门={}，职级={}）"
+
+msgid "Account {} already belongs to another tenant, please use a different one."
+msgstr "账号 {} 已属于其它租户, 请更换"
+
+# 组织架构树形编辑/导入校验 (2026-09-12)
+msgid "Dept is required"
+msgstr "部门为空"
+
+msgid "Name is required"
+msgstr "姓名为空"
+
+msgid "Account is required"
+msgstr "账号为空"
+
+msgid "Unrecognized tier: {}"
+msgstr "职级无法识别: {}"
+
+msgid "Account contains invalid characters (only letters/numbers/underscore/hyphen/dot/@ allowed)"
+msgstr "账号含非法字符(仅字母/数字/下划线/中划线/点/@)"
+
+msgid "Dept name is required"
+msgstr "部门名称不能为空"
+
+msgid "Parent dept does not exist"
+msgstr "上级部门不存在"
+
+msgid "Dept does not exist"
+msgstr "部门不存在"
+
+msgid "Please delete the sub-depts under this dept first"
+msgstr "请先删除该部门下的子部门"
+
+msgid "Please move or delete the members of this dept first"
+msgstr "请先移动或删除该部门的成员"
+
+msgid "Member does not exist"
+msgstr "成员不存在"
+
+msgid "Account {} already exists"
+msgstr "账号 {} 已存在"
+
+msgid "Login account must be an email, e.g. name@example.com"
+msgstr "登录账号必须是邮箱，如 name@example.com"
+
+# Google 日历ID 唯一性 (2026-09-12)
+msgid "This Google calendar ID is already used by another tenant"
+msgstr "该 Google 日历ID 已被其它租户使用"
+
+# 密码重置邮件流程 (2026-09-12)
+msgid "If this email exists, a reset link has been sent"
+msgstr "如果该邮箱存在，重置链接已发送"
+
+msgid "Reset link is invalid or expired"
+msgstr "重置链接无效或已过期"
+
+msgid "Reset link has expired, please request a new one"
+msgstr "重置链接已过期，请重新申请"
+
+msgid "Password must be at least 8 characters and contain both letters and numbers"
+msgstr "密码至少 8 位，且须同时包含字母和数字"
+
+msgid "Password reset, sign in with the new password"
+msgstr "密码已重置，请用新密码登录"
+
+# 密码重置邮件内容 (2026-09-12)
+msgid "Reset your password - proNotify"
+msgstr "重置密码 - proNotify"
+
+msgid "Hello,"
+msgstr "您好,"
+
+msgid "Please click the link below to reset your password (valid for {} minutes):\n\n{}"
+msgstr "请点击以下链接重置密码（{} 分钟内有效）：\n\n{}"
+
+msgid "If you did not request this, please ignore this email."
+msgstr "如果这不是您本人操作，请忽略此邮件。"
+
+msgid "Please click the link below to reset your password (<b>{} minutes</b>):"
+msgstr "请点击以下链接重置密码(<b>{} 分钟内有效</b>):"
+
+# 注册验证邮件内容 (2026-09-12)
+msgid "Verify your email - proNotify"
+msgstr "注册验证 - proNotify"
+
+msgid "Thank you for signing up for proNotify. Please click the link below to verify your email (valid for {} hours):\n\n{}"
+msgstr "感谢注册 proNotify，请点击以下链接验证邮箱（{} 小时内有效）：\n\n{}"
+
+msgid "After verification you can complete the payment and activate your account."
+msgstr "验证通过后即可完成付费并开通账号。"
+
+msgid "Thank you for signing up for <b>proNotify</b>. Please click the link below to verify your email (<b>{} hours</b>):"
+msgstr "感谢注册 <b>proNotify</b>，请点击以下链接验证邮箱(<b>{} 小时内有效</b>):"
+
+# 工作台手动发送提示 (2026-09-12)
+msgid "Missing property_id"
+msgstr "缺少 property_id"
+
+msgid "Tenant is expired or inactive, please renew your plan"
+msgstr "租户已到期或停用，请先续费后再发送"
+
+msgid "Property does not exist or no access permission"
+msgstr "房源不存在或无权访问"
+
+msgid "Not within the rent start ~ end period"
+msgstr "当前不在起租~结束租期内"
+
+msgid "This property has no LINE group ID set"
+msgstr "该房源未设置群 ID"
+
+msgid "Rule does not exist or does not belong to this property"
+msgstr "规则不存在或不属于该房源"
+
+msgid "This rule is disabled"
+msgstr "该规则已停用"
+
+msgid "Today is not the reminder day for this rule (utility/custom)"
+msgstr "今天不是该规则(水电/自定义)的提醒日"
+
+msgid "Today is not the expiry reminder day for this property"
+msgstr "今天不是该房源的到期提醒日"
+
+msgid "Today is not the rent reminder day for this property"
+msgstr "今天不是该房源的付租提醒日"
+
+msgid "There is no reminder to send today"
+msgstr "今天没有可发送的提醒"
+
+msgid "No LINE Bot assigned to this tenant, cannot send"
+msgstr "该租户未分配 Line Bot，无法发送"
+
+msgid "Bot({}) is disabled, cannot send"
+msgstr "Bot({}) 已停用，无法发送"
+
+msgid "Bot ownership check failed, sending rejected"
+msgstr "Bot 归属校验失败，已拒绝发送"
+
+msgid "Sent to the group"
+msgstr "已发送到群"
+
+msgid "Send failed: cannot connect to LINE or insufficient group permission (check network/proxy and retry)"
+msgstr "发送失败：无法连接 LINE 或群权限不足（请检查网络/代理后重试）"
+
+# 群发视图 (2026-09-12)
+msgid "Only tenant managers can broadcast"
+msgstr "仅租户经理可群发"
+
+msgid "No tenant"
+msgstr "无租户"
+
+msgid "Message content is empty"
+msgstr "消息内容不能为空"
+
+msgid "Message content cannot exceed 800 characters"
+msgstr "消息内容不能超过 800 字"
+
+msgid "No sendable property groups (none have a group ID set)"
+msgstr "当前没有可发送的房源群(均未设置群ID)"
+
+msgid "Failed to trigger the background task, please retry later"
+msgstr "后台任务触发失败，请稍后重试"
+
+msgid "Only tenant managers can view"
+msgstr "仅租户经理可查看"
+
+msgid "Missing task_id"
+msgstr "缺少 task_id"
+
+msgid "Task does not exist"
+msgstr "任务不存在"
+
+msgid "No permission to view this task"
+msgstr "无权查看该任务"
+
+msgid "Only tenant managers can clean up"
+msgstr "仅租户经理可清理"
+
+# comprehensive i18n sweep (2026-09-12)
+msgid "AI API Key is not configured"
+msgstr "未配置 AI API Key"
+
+msgid "AI config saved"
+msgstr "AI 配置已保存"
+
+msgid "AI parsing failed: {}"
+msgstr "AI 解析失败：{}"
+
+msgid "AI {}, please retry later"
+msgstr "AI {}，请稍后重试"
+
+msgid "Account not found"
+msgstr "未找到该账号"
+
+msgid "Account unlocked"
+msgstr "账号已解锁"
+
+msgid "Activation failed, please retry later"
+msgstr "开通失败, 请稍后重试"
+
+msgid "Already paid and activated, please sign in"
+msgstr "已付费开通, 请直接登录"
+
+msgid "Batch created {} items, skipped {} items (already exist)"
+msgstr "批量创建成功 {} 项，跳过 {} 项（已存在）"
+
+msgid "Calendar sync exception: {}"
+msgstr "日历同步异常: {}"
+
+msgid "Cannot connect to the AI service (network/proxy issue), please retry later"
+msgstr "无法连接 AI 服务(网络/代理问题)，请稍后重试"
+
+msgid "Cannot disable the currently logged-in superuser account"
+msgstr "不能停用当前登录的超管账号"
+
+msgid "Cannot reset your own password here (use personal center)"
+msgstr "不能重置自己的密码(请走个人中心改密)"
+
+msgid "Company name cannot be empty"
+msgstr "公司名称不能为空"
+
+msgid "Company name is missing"
+msgstr "公司名称缺失"
+
+msgid "Company name updated"
+msgstr "公司名称已更新"
+
+msgid "Completed, {} reminders sent"
+msgstr "已完成，共发送 {} 条提醒"
+
+msgid "Created {} items, skipped {} items (already exist)"
+msgstr "已创建 {} 项，跳过 {} 项（已存在）"
+
+msgid "Daily reminder time updated to Thailand time {:02d}:{:02d} and is now in effect"
+msgstr "每日提醒时间已更新为泰国时间 {:02d}:{:02d}，并已生效"
+
+msgid "Data parse failed: {}"
+msgstr "数据解析失败: {}"
+
+msgid "Default password saved"
+msgstr "默认密码已保存"
+
+msgid "Dept deleted"
+msgstr "部门已删除"
+
+msgid "Dept saved"
+msgstr "部门已保存"
+
+msgid "Email verified successfully"
+msgstr "邮箱验证成功"
+
+msgid "Failed to create charge"
+msgstr "创建 charge 失败"
+
+msgid "Failed to query DeepL quota"
+msgstr "查询 DeepL 额度失败"
+
+msgid "Fetched successfully"
+msgstr "获取成功"
+
+msgid "File parse failed: {}"
+msgstr "文件解析失败: {}"
+
+msgid "Google calendar saved, but sync failed"
+msgstr "Google 日历已保存, 但同步失败"
+
+msgid "Google calendar updated, synced {}, failed {}"
+msgstr "Google 日历已更新, 同步 {} 条, 失败 {} 条"
+
+msgid "Import completed: {} properties added"
+msgstr "导入完成: 新增 {} 条房源"
+
+msgid "Linebot assigned"
+msgstr "Linebot 已分配"
+
+msgid "Login security settings saved"
+msgstr "登录安全设置已保存"
+
+msgid "Member deleted"
+msgstr "成员已删除"
+
+msgid "Member saved"
+msgstr "成员已保存"
+
+msgid "Missing charge_id"
+msgstr "缺少 charge_id"
+
+msgid "Missing property"
+msgstr "缺少 property"
+
+msgid "Missing user ID"
+msgstr "缺少用户ID"
+
+msgid "No data"
+msgstr "暂无数据"
+
+msgid "No file received"
+msgstr "未收到文件"
+
+msgid "No permission to manage this tenant's calendar settings"
+msgstr "无权限操作该租户的日历设置"
+
+msgid "No permission to manage this tenant's company name"
+msgstr "无权限操作该租户的公司名称"
+
+msgid "No permission to manage this tenant's org chart"
+msgstr "无权限操作该租户的组织架构"
+
+msgid "No permission to manage this tenant's signature settings"
+msgstr "无权限操作该租户的签名设置"
+
+msgid "No permission to operate this payment record"
+msgstr "无权操作该支付记录"
+
+msgid "No permission to operate this role"
+msgstr "无权操作该角色"
+
+msgid "No permission to view this payment record"
+msgstr "无权查看该支付记录"
+
+msgid "No tenant, no permission"
+msgstr "无租户, 无权操作"
+
+msgid "No tenant, no permission to operate this role"
+msgstr "无租户, 无权操作该角色"
+
+msgid "No valid data rows parsed"
+msgstr "未解析到任何有效数据行"
+
+msgid "No views module found under App '{}'"
+msgstr "App '{}' 下未找到 views 模块"
+
+msgid "Not in dev/test mode, cannot simulate"
+msgstr "非开发/测试模式，不可模拟"
+
+msgid "Omise did not return a QR code"
+msgstr "Omise 未返回二维码"
+
+msgid "Only superuser or this tenant manager can reset password"
+msgstr "仅超管或本租户经理可重置密码"
+
+msgid "Only tenant managers can renew"
+msgstr "仅租户经理可发起续费"
+
+msgid "Org chart cleared (members {}, depts {})"
+msgstr "已清空组织架构(成员{}、部门{})"
+
+msgid "Org chart import completed"
+msgstr "组织架构导入完成"
+
+msgid "Password cannot be empty"
+msgstr "密码不能为空"
+
+msgid "Password has been reset"
+msgstr "密码已重置"
+
+msgid "Password must be at least 8 characters"
+msgstr "密码至少 8 位"
+
+msgid "Payment gateway is not enabled"
+msgstr "支付网关未启用"
+
+msgid "Payment record does not exist"
+msgstr "支付记录不存在"
+
+msgid "Permission key already exists in this tenant"
+msgstr "该租户下权限字符已存在"
+
+msgid "Please complete the payment activation first"
+msgstr "当前仍需先完成付费开通"
+
+msgid "Please enter the email or username to unlock"
+msgstr "请输入要解锁的邮箱或用户名"
+
+msgid "Please enter the property description to add"
+msgstr "请输入需要添加的房源描述"
+
+msgid "Please upload a CSV/Excel file, or provide rows"
+msgstr "请上传 CSV/Excel 文件, 或提供 rows"
+
+msgid "Please upload a file or provide a rows array"
+msgstr "请上传文件或提供 rows 数组"
+
+msgid "Preview generated"
+msgstr "预览生成"
+
+msgid "Property does not exist or is not within your data scope"
+msgstr "该房源不存在或不在你的数据范围内"
+
+msgid "Property does not exist or no permission to view"
+msgstr "房源不存在或无权查看"
+
+msgid "Renewal amount is not configured"
+msgstr "续费金额未配置"
+
+msgid "Role name already exists in this tenant"
+msgstr "该租户下角色名称已存在"
+
+msgid "Saved but sync failed: {}"
+msgstr "已保存但同步失败: {}"
+
+msgid "Self-service signup mode saved"
+msgstr "自助注册模式已保存"
+
+msgid "Signature updated"
+msgstr "落款签名已更新"
+
+msgid "Sync completed: {} succeeded, {} failed"
+msgstr "同步完成: 成功 {} 条, 失败 {} 条"
+
+msgid "Sync exception: {}"
+msgstr "同步异常: {}"
+
+msgid "Tenant activated, please sign in again"
+msgstr "租户已开通, 请重新登录"
+
+msgid "Tenant does not exist"
+msgstr "租户不存在"
+
+msgid "The app parameter is required"
+msgstr "app 参数必填"
+
+msgid "The menu_id parameter is required"
+msgstr "menu_id 参数必填"
+
+msgid "This account already has a tenant, no need to sign up"
+msgstr "该账号已存在租户, 无需注册付费"
+
+msgid "This account already has a tenant, please sign in directly"
+msgstr "该账号已开通租户, 请直接登录"
+
+msgid "This email is already in use"
+msgstr "该邮箱已被占用"
+
+msgid "This email is already verified, please complete the payment to activate your account"
+msgstr "该邮箱已验证，请完成支付开通账号"
+
+msgid "This menu has no component name (component_name), cannot auto-generate permissions"
+msgstr "该菜单未设置组件名称(component_name)，无法自动生成权限"
+
+msgid "This property is not within your data scope"
+msgstr "该房源不在你的数据范围内"
+
+msgid "Trigger failed"
+msgstr "触发失败"
+
+msgid "Updated {} items"
+msgstr "更新成功 {} 项"
+
+msgid "Uploaded {} files"
+msgstr "已上传 {} 个文件"
+
+msgid "User does not exist"
+msgstr "用户不存在"
+
+msgid "Verification email sent, please check your inbox (valid for 24 hours)"
+msgstr "验证邮件已发送，请查收（24 小时内有效）"
+
+msgid "Your account has no tenant, cannot renew"
+msgstr "当前账号无租户, 无法发起续费"
+
+msgid "base config item not found"
+msgstr "未找到 base 配置项"
+
+msgid "base64"
+msgstr ""
+
+msgid "buttons cannot be empty"
+msgstr "buttons 不能为空"
+
+msgid "logging"
+msgstr ""
+
+msgid "service error"
+msgstr "服务异常"
+
+msgid "service rate-limited/overloaded"
+msgstr "服务限流/过载"
+
+msgid "{} must be a positive integer"
+msgstr "{} 需为正整数"
+

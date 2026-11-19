@@ -1,0 +1,56 @@
+export default {
+    message: {
+        pages: {
+            linebot: {
+                buttons: {
+                    view: '查看',
+                    edit: '编辑',
+                    delete: '删除',
+                },
+                table: {
+                    columns: {
+                        index: '序号',
+                        name: 'Bot名称',
+                        botCode: 'Bot标识',
+                        channelId: 'Channel ID',
+                        basicId: 'Bot basic ID',
+                        botUserId: 'Bot User Id',
+                        tenant: '归属租户',
+                        channelSecret: 'Channel Secret',
+                        channelAccessToken: 'Channel Access Token',
+                        isDefault: '默认Bot',
+                        isActive: '启用',
+                        monthlyQuota: '月消息配额',
+                    },
+                    placeholder: {
+                        monthlyQuota: '留空用全局配置',
+                    },
+                },
+                validation: {
+                    nameRequired: '请输入Bot名称',
+                    botCodeRequired: '请输入Bot标识',
+                },
+                title: '可用 LineBot',
+                count: '共 {n} 个',
+                note: '本公司的推送机器人（只读；凭据由平台管理）',
+                refreshAll: '刷新全部',
+                empty: '当前公司还没有 LineBot，请联系平台开通',
+                platformDefault: '平台默认',
+                enabled: '启用',
+                disabled: '停用',
+                monthlyQuotaShort: '本月配额',
+                refreshQuota: '刷新配额',
+                credentials: '凭据',
+                secretSet: 'Secret 已设置 (末4位 {tail})',
+                secretNotSet: 'Secret 未设置',
+                tokenSet: 'Token 已设置 (末4位 {tail})',
+                tokenNotSet: 'Token 未设置',
+                refreshSuccess: '已刷新 {name} 配额',
+                refreshFailNetwork: '无法连接 LINE（网络不可达 / 代理未开启），{name} 配额暂不可用',
+                refreshFail: '无法连接 LINE（网络不可达），刷新失败',
+                refreshAllDone: '已刷新全部 {n} 个 Bot 配额',
+                refreshAllPartial: '刷新完成：成功 {ok} 个，失败 {fail} 个（{names}）无法连接 LINE，配额暂不可用',
+            },
+        },
+    },
+};

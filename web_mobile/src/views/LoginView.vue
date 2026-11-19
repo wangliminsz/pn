@@ -1,0 +1,365 @@
+<template>
+	<div class="login-page">
+		<main class="login-main">
+			<div class="brand-orb" aria-hidden="true">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+					<path d="m3 9.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20z" />
+					<path d="M9 21.5v-7h6v7" />
+				</svg>
+				<span>PRONOTIFY</span>
+			</div>
+
+			<form class="login-form" @submit.prevent="submit">
+				<div class="simple-field">
+					<Icon name="user" :size="20" />
+					<input
+						id="account"
+						v-model="username"
+						type="text"
+						autocomplete="username"
+						placeholder="Email"
+						@input="error = ''"
+					/>
+				</div>
+
+				<div class="simple-field">
+					<Icon name="lock" :size="20" />
+					<input
+						id="password"
+						v-model="password"
+						:type="showPassword ? 'text' : 'password'"
+						autocomplete="current-password"
+						placeholder="Password"
+						@input="error = ''"
+					/>
+					<button
+						type="button"
+						class="password-toggle"
+						:aria-label="showPassword ? 'Hide password' : 'Show password'"
+						:aria-pressed="showPassword"
+						@click="showPassword = !showPassword"
+					>
+						<Icon :name="showPassword ? 'eyeOff' : 'eye'" :size="19" />
+					</button>
+				</div>
+
+				<div v-if="captchaImg" class="simple-field captcha-field">
+					<Icon name="check" :size="20" />
+					<input
+						id="captcha"
+						v-model="captcha"
+						type="text"
+						autocomplete="off"
+						maxlength="6"
+						placeholder="Verification code"
+						@input="error = ''"
+					/>
+					<button type="button" class="captcha-img" title="Refresh code" @click="fetchCaptcha">
+						<img :src="captchaImg" alt="Verification code" />
+					</button>
+				</div>
+
+				<div v-if="error" class="error-box" role="alert">
+					<Icon name="alert" :size="16" />
+					<span>{{ error }}</span>
+				</div>
+
+				<button class="login-btn" type="submit" :disabled="submitting">
+					<van-loading v-if="submitting" size="20" color="#06251c" />
+					<span>{{ submitting ? 'LOGGING IN…' : 'LOGIN' }}</span>
+				</button>
+			</form>
+		</main>
+	</div>
+</template>
+
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { showFailToast } from 'vant';
+import { getCaptcha } from '@/api/auth';
+import { useAuthStore } from '@/stores/auth';
+import { errorMessage } from '@/utils/errors';
+import Icon from '@/components/Icon.vue';
+
+const route = useRoute();
+const router = useRouter();
+const auth = useAuthStore();
+
+const username = ref('');
+const password = ref('');
+const showPassword = ref(false);
+const captcha = ref('');
+const captchaImg = ref('');
+const captchaKey = ref('');
+const submitting = ref(false);
+const error = ref('');
+
+async function fetchCaptcha(): Promise<boolean> {
+	try {
+		const res: any = await getCaptcha();
+		const data = res.data || {};
+		captchaImg.value = data.image_base || '';
+		captchaKey.value = data.key ?? '';
+		captcha.value = '';
+		return true;
+	} catch {
+		/* Captcha is optional; login still works when the backend disables it. */
+		return false;
+	}
+}
+
+async function submit() {
+	error.value = '';
+	if (!username.value.trim() || !password.value) {
+		error.value = 'Enter your account and password to continue.';
+		return;
+	}
+	if (captchaImg.value && !captcha.value.trim()) {
+		error.value = 'Enter the verification code.';
+		return;
+	}
+
+	// If the captcha image failed to load earlier (e.g. backend was restarting),
+	// fetch it again before attempting login.
+	if (!captchaImg.value) {
+		await fetchCaptcha();
+		if (captchaImg.value) {
+			error.value = 'Enter the verification code shown above, then tap LOGIN again.';
+			return;
+		}
+	}
+
+	submitting.value = true;
+	try {
+		await auth.signIn({
+			username: username.value.trim(),
+			password: password.value,
+			...(captchaImg.value
+				? { captcha: captcha.value.trim(), captchaKey: captchaKey.value }
+				: {}),
+		});
+		const rawRedirect = typeof route.query.redirect === 'string' ? route.query.redirect : '';
+		const redirect = rawRedirect.startsWith('/') ? rawRedirect : '/properties';
+		await router.replace(redirect);
+	} catch (err) {
+		const message = errorMessage(err, 'Sign in failed. Please check your details.');
+		error.value = message;
+		showFailToast('Sign in failed');
+		if (captchaImg.value) {
+			void fetchCaptcha();
+		} else if (/verification code/i.test(message)) {
+			await fetchCaptcha();
+			if (captchaImg.value) {
+				error.value = 'Enter the verification code shown above, then tap LOGIN again.';
+			}
+		}
+	} finally {
+		submitting.value = false;
+	}
+}
+
+onMounted(() => {
+	void fetchCaptcha();
+});
+</script>
+
+<style scoped>
+.login-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: calc(32px + env(safe-area-inset-top)) 28px calc(32px + env(safe-area-inset-bottom));
+	background:
+		radial-gradient(90% 55% at 50% 8%, rgba(234, 88, 12, 0.07) 0%, transparent 56%),
+		#121916;
+}
+
+.login-main {
+	width: 100%;
+	max-width: 370px;
+}
+
+.brand-orb {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	width: 116px;
+	height: 116px;
+	margin: 0 auto 58px;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #ff7a1a 0%, #ea580c 58%, #c2410c 100%);
+	color: #fff;
+	box-shadow: 0 18px 48px rgba(234, 88, 12, 0.24);
+}
+
+.brand-orb svg {
+	width: 42px;
+	height: 42px;
+}
+
+.brand-orb span {
+	font-size: 8px;
+	font-weight: 600;
+	letter-spacing: 1.5px;
+	opacity: 0.96;
+}
+
+.login-form {
+	width: 100%;
+}
+
+.simple-field {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	min-height: 64px;
+	border-bottom: 1px solid #2a3631;
+	color: #8b958f;
+	transition: border-color 180ms ease;
+}
+
+.simple-field:focus-within {
+	border-bottom-color: #39d7a7;
+}
+
+.simple-field + .simple-field {
+	margin-top: 8px;
+}
+
+.simple-field input {
+	flex: 1;
+	min-width: 0;
+	height: 62px;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	background: transparent;
+	color: #f1f5f2;
+	font-size: 19px;
+	font-weight: 400;
+}
+
+.simple-field input::placeholder {
+	color: #c4cbc6;
+	opacity: 1;
+}
+
+.password-toggle {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: #8b958f;
+	transition:
+		color 180ms ease,
+		background 180ms ease;
+}
+
+.password-toggle:hover {
+	color: #d7ded9;
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.password-toggle:focus-visible {
+	outline: 2px solid #39d7a7;
+	outline-offset: 2px;
+}
+
+.captcha-field {
+	padding-right: 2px;
+}
+
+.captcha-img {
+	flex: 0 0 auto;
+	width: 104px;
+	height: 40px;
+	padding: 0 6px;
+	overflow: hidden;
+	border: 1px solid #2a3631;
+	border-radius: 8px;
+	background: #18211d;
+}
+
+.captcha-img img {
+	display: block;
+	width: 100%;
+	height: 38px;
+	object-fit: contain;
+}
+
+.error-box {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding: 10px 12px;
+	margin-top: 20px;
+	border: 1px solid rgba(245, 108, 108, 0.24);
+	border-radius: 10px;
+	background: rgba(245, 108, 108, 0.08);
+	color: #ffaaaa;
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+.login-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	height: 58px;
+	margin-top: 46px;
+	padding: 0 22px;
+	border: 0;
+	border-radius: 999px;
+	background: linear-gradient(180deg, #3cdcac 0%, #29c795 100%);
+	color: #06251c;
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: 0.6px;
+	box-shadow: 0 14px 34px rgba(41, 199, 149, 0.2);
+	transition:
+		opacity 180ms ease,
+		transform 180ms ease,
+		box-shadow 180ms ease;
+}
+
+.login-btn:hover:not(:disabled) {
+	box-shadow: 0 16px 38px rgba(41, 199, 149, 0.3);
+}
+
+.login-btn:active:not(:disabled) {
+	transform: scale(0.985);
+}
+
+.login-btn:disabled {
+	opacity: 0.7;
+}
+
+@media (max-height: 700px) {
+	.brand-orb {
+		width: 96px;
+		height: 96px;
+		margin-bottom: 38px;
+	}
+
+	.brand-orb svg {
+		width: 34px;
+		height: 34px;
+	}
+
+	.login-btn {
+		margin-top: 32px;
+	}
+}
+</style>

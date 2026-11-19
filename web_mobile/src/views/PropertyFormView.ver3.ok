@@ -1,0 +1,638 @@
+<template>
+	<div class="page form-page">
+		<header class="form-topbar">
+			<button class="icon-btn back-btn" type="button" aria-label="Go back" @click="goBack">
+				<Icon name="arrowLeft" :size="18" />
+			</button>
+			<div class="topbar-title">
+				<span>{{ isEdit ? 'Edit property' : 'New property' }}</span>
+				<strong>{{ isEdit ? 'Update room details' : 'Add a room' }}</strong>
+			</div>
+			<button class="save-text" type="button" :disabled="saving || loading" @click="save">
+				<van-loading v-if="saving" size="14" color="#409EFF" />
+				<span v-else>Save</span>
+			</button>
+		</header>
+
+		<div v-if="loading" class="form-loading">
+			<van-loading size="24" color="#409EFF" />
+			<span>Loading property…</span>
+		</div>
+
+		<form v-else class="form-body" @submit.prevent="save">
+			<section class="form-hero">
+				<div class="hero-icon"><Icon name="building" :size="22" /></div>
+				<div class="hero-copy">
+					<p class="eyebrow">{{ isEdit ? 'EDIT PROPERTY' : 'NEW PROPERTY' }}</p>
+					<h1>{{ form.name.trim() || 'Untitled room' }}</h1>
+					<p>{{ isEdit ? 'Keep the room details up to date.' : 'Track rent, lease dates and reminders in one place.' }}</p>
+				</div>
+			</section>
+
+			<div v-if="error" class="error-box" role="alert">
+				<Icon name="alert" :size="16" />
+				<span>{{ error }}</span>
+			</div>
+
+			<section class="form-section">
+				<div class="section-head">
+					<h2>Room details</h2>
+					<span>Required</span>
+				</div>
+				<van-cell-group inset>
+					<van-field
+						v-model="form.name"
+						label="Name"
+						placeholder="e.g. Chapter Riverside 1403/299"
+						maxlength="128"
+						required
+						@update:model-value="error = ''"
+					/>
+					<van-field v-model="form.rent_amount" type="number" label="Rent" placeholder="0.00">
+						<template #left-icon><span class="currency">฿</span></template>
+					</van-field>
+					<SelectField
+						v-model="form.pay_period"
+						label="Pay period"
+						:options="periodOptions"
+						:clearable="false"
+					/>
+					<van-field v-model="form.remind_day" type="digit" label="Remind day" placeholder="1-31" maxlength="2">
+						<template #button><span class="field-hint">day of month</span></template>
+					</van-field>
+				</van-cell-group>
+			</section>
+
+			<section class="form-section">
+				<div class="section-head">
+					<h2>Lease term</h2>
+					<span>Required</span>
+				</div>
+				<van-cell-group inset>
+					<DateField v-model="form.rent_start" label="Start date" placeholder="Select start date" />
+					<DateField v-model="form.rent_end" label="End date" placeholder="Select end date" />
+				</van-cell-group>
+				<p class="section-hint">The start date is used as the anchor for rent reminders.</p>
+			</section>
+
+			<section class="form-section">
+				<div class="section-head">
+					<h2>Assignment</h2>
+					<span>Optional</span>
+				</div>
+				<van-cell-group inset>
+					<SelectField v-model="form.owner" label="Owner" placeholder="Select owner" :options="ownerOptions" />
+					<SelectField v-model="form.line_bot" label="Line bot" placeholder="Select line bot" :options="botOptions" />
+					<van-field v-model="form.group_id" label="Group ID" placeholder="Line group ID" maxlength="128" />
+				</van-cell-group>
+			</section>
+
+			<section class="form-section">
+				<div class="section-head">
+					<h2>Notes</h2>
+					<span>Optional</span>
+				</div>
+				<van-cell-group inset>
+					<van-field
+						v-model="form.memo"
+						type="textarea"
+						rows="3"
+						autosize
+						label="Memo"
+						placeholder="Payment account, access details, special notes…"
+						maxlength="512"
+						show-word-limit
+					/>
+				</van-cell-group>
+			</section>
+
+			<section class="form-section">
+				<div class="section-head">
+					<h2>Automation</h2>
+				</div>
+				<div class="switch-list">
+					<label class="switch-row">
+						<div>
+							<strong>Write to Google Calendar</strong>
+							<span>Sync rent and lease reminders.</span>
+						</div>
+						<van-switch v-model="form.calendar_in" size="22px" />
+					</label>
+				</div>
+			</section>
+
+			<button class="btn-primary submit-btn" type="submit" :disabled="saving">
+				<van-loading v-if="saving" size="18" color="#ffffff" />
+				<Icon v-else name="check" :size="17" />
+				<span>{{ saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create property' }}</span>
+			</button>
+
+			<button v-if="isEdit" class="btn-ghost danger delete-btn" type="button" :disabled="deleting" @click="askDelete">
+				<van-loading v-if="deleting" size="14" color="#F56C6C" />
+				<Icon v-else name="trash" :size="15" />
+				<span>Delete property</span>
+			</button>
+
+			<p class="form-note">Changes are saved to your tenant workspace.</p>
+		</form>
+	</div>
+</template>
+
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { showConfirmDialog, showFailToast, showSuccessToast } from 'vant';
+import {
+	createProperty,
+	deleteProperty,
+	getLineBotOptions,
+	getOwnerOptions,
+	getProperty,
+	updateProperty,
+} from '@/api/property';
+import { useAuthStore } from '@/stores/auth';
+import { errorMessage } from '@/utils/errors';
+import DateField from '@/components/DateField.vue';
+import Icon from '@/components/Icon.vue';
+import SelectField from '@/components/SelectField.vue';
+
+interface Option {
+	label: string;
+	value: string | number;
+}
+
+const route = useRoute();
+const router = useRouter();
+const auth = useAuthStore();
+
+const id = computed(() => (route.params.id ? String(route.params.id) : ''));
+const isEdit = computed(() => Boolean(id.value));
+
+const loading = ref(false);
+const saving = ref(false);
+const deleting = ref(false);
+const error = ref('');
+
+const periodOptions: Option[] = [
+	{ label: 'Monthly', value: 'Monthly' },
+	{ label: 'Quarterly', value: 'Quarterly' },
+	{ label: 'Half year', value: 'HalfYear' },
+	{ label: 'Yearly', value: 'Yearly' },
+];
+
+const ownerOptions = ref<Option[]>([{ label: 'Unassigned', value: 0 }]);
+const botOptions = ref<Option[]>([]);
+
+const form = reactive({
+	name: '',
+	rent_amount: '',
+	pay_period: 'Monthly',
+	remind_day: '1',
+	rent_start: '',
+	rent_end: '',
+	group_id: '',
+	owner: 0 as string | number,
+	line_bot: null as string | number | null,
+	calendar_in: true,
+	memo: '',
+});
+
+function todayISO() {
+	const now = new Date();
+	const month = `${now.getMonth() + 1}`.padStart(2, '0');
+	const day = `${now.getDate()}`.padStart(2, '0');
+	return `${now.getFullYear()}-${month}-${day}`;
+}
+
+function addYears(date: string, years: number) {
+	const parsed = new Date(`${date}T12:00:00`);
+	parsed.setFullYear(parsed.getFullYear() + years);
+	const month = `${parsed.getMonth() + 1}`.padStart(2, '0');
+	const day = `${parsed.getDate()}`.padStart(2, '0');
+	return `${parsed.getFullYear()}-${month}-${day}`;
+}
+
+async function loadOptions() {
+	try {
+		const [ownerRes, botRes]: any[] = await Promise.all([getOwnerOptions(), getLineBotOptions()]);
+		ownerOptions.value = [
+			{ label: 'Unassigned', value: 0 },
+			...(ownerRes.data || []).map((item: any) => ({
+				label: item.name || item.username || `User #${item.id}`,
+				value: item.id,
+			})),
+		];
+		botOptions.value = (botRes.data || []).map((item: any) => ({
+			label: item.is_default ? `${item.name} (default)` : item.name,
+			value: item.id,
+		}));
+	} catch {
+		/* Assignment options are optional; core property fields still work. */
+	}
+}
+
+async function loadProperty() {
+	loading.value = true;
+	error.value = '';
+	try {
+		const res: any = await getProperty(id.value);
+		const property = res.data || {};
+		Object.assign(form, {
+			name: property.name || '',
+			rent_amount:
+				property.rent_amount === null || property.rent_amount === undefined
+					? ''
+					: String(property.rent_amount),
+			pay_period: property.pay_period || 'Monthly',
+			remind_day: String(property.remind_day ?? 1),
+			rent_start: property.rent_start || '',
+			rent_end: property.rent_end || '',
+			group_id: property.group_id || '',
+			owner: property.owner ?? 0,
+			line_bot: property.line_bot ?? null,
+			calendar_in: Boolean(property.calendar_in),
+			memo: property.memo || '',
+		});
+	} catch (err) {
+		error.value = errorMessage(err, 'Could not load this property.');
+		showFailToast(error.value);
+	} finally {
+		loading.value = false;
+	}
+}
+
+function validate() {
+	if (!form.name.trim()) return 'Enter a property name.';
+	if (!form.rent_start) return 'Select the lease start date.';
+	if (!form.rent_end) return 'Select the lease end date.';
+	if (form.rent_end < form.rent_start) return 'The end date must be after the start date.';
+	const remindDay = Number(form.remind_day);
+	if (!Number.isFinite(remindDay) || remindDay < 1 || remindDay > 31) {
+		return 'Remind day must be between 1 and 31.';
+	}
+	if (form.rent_amount !== '' && Number(form.rent_amount) < 0) {
+		return 'Rent cannot be negative.';
+	}
+	return '';
+}
+
+function buildPayload() {
+	const payload: Record<string, unknown> = {
+		name: form.name.trim(),
+		rent_amount: form.rent_amount === '' ? null : Number(form.rent_amount),
+		remind_day: Math.min(31, Math.max(1, Number(form.remind_day) || 1)),
+		pay_period: form.pay_period,
+		rent_start: form.rent_start,
+		rent_end: form.rent_end,
+		group_id: form.group_id.trim(),
+		line_bot: form.line_bot ? form.line_bot : null,
+		calendar_in: form.calendar_in,
+		memo: form.memo.trim(),
+	};
+	if (form.owner) {
+		payload.owner = form.owner;
+	} else if (isEdit.value) {
+		payload.owner = null;
+	}
+	return payload;
+}
+
+async function save() {
+	if (saving.value) return;
+	const message = validate();
+	if (message) {
+		error.value = message;
+		showFailToast(message);
+		return;
+	}
+
+	saving.value = true;
+	error.value = '';
+	try {
+		const payload = buildPayload();
+		if (isEdit.value) {
+			await updateProperty(id.value, payload);
+			showSuccessToast('Property updated');
+		} else {
+			await createProperty(payload);
+			showSuccessToast('Property added');
+		}
+		await router.replace({ name: 'properties' });
+	} catch (err) {
+		error.value = errorMessage(err, 'Could not save this property.');
+		showFailToast(error.value);
+	} finally {
+		saving.value = false;
+	}
+}
+
+async function askDelete() {
+	try {
+		await showConfirmDialog({
+			title: 'Delete property?',
+			message: 'This room and its reminders and files will be permanently removed.',
+			confirmButtonText: 'Delete',
+			confirmButtonColor: '#F56C6C',
+		});
+	} catch {
+		return;
+	}
+
+	deleting.value = true;
+	try {
+		await deleteProperty(id.value);
+		showSuccessToast('Property deleted');
+		await router.replace({ name: 'properties' });
+	} catch (err) {
+		showFailToast(errorMessage(err, 'Delete failed'));
+	} finally {
+		deleting.value = false;
+	}
+}
+
+function goBack() {
+	if (window.history.state?.back) router.back();
+	else router.replace({ name: 'properties' });
+}
+
+onMounted(async () => {
+	void loadOptions();
+	if (isEdit.value) {
+		await loadProperty();
+	} else {
+		await auth.restore();
+		form.rent_start = todayISO();
+		form.rent_end = addYears(form.rent_start, 1);
+		if (auth.user?.id) form.owner = auth.user.id;
+	}
+});
+</script>
+
+<style scoped>
+.form-page {
+	padding-bottom: calc(28px + env(safe-area-inset-bottom));
+}
+
+.form-topbar {
+	position: sticky;
+	top: 0;
+	z-index: 12;
+	display: grid;
+	grid-template-columns: 40px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 11px;
+	padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+	background: rgba(23, 23, 23, 0.92);
+	border-bottom: 1px solid var(--pn-border);
+	backdrop-filter: blur(16px);
+}
+
+.back-btn {
+	width: 38px;
+	height: 38px;
+	border-radius: 11px;
+	background: #222224;
+}
+
+.topbar-title {
+	min-width: 0;
+	line-height: 1.2;
+}
+
+.topbar-title span {
+	display: block;
+	color: var(--pn-text-strong);
+	font-size: 13.5px;
+	font-weight: 600;
+}
+
+.topbar-title strong {
+	display: block;
+	margin-top: 2px;
+	overflow: hidden;
+	color: var(--pn-faint);
+	font-size: 10px;
+	font-weight: 400;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.save-text {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 52px;
+	min-height: 38px;
+	padding: 0 12px;
+	border: 1px solid rgba(64, 158, 255, 0.3);
+	border-radius: 10px;
+	background: rgba(64, 158, 255, 0.1);
+	color: #8dc5ff;
+	font-size: 12.5px;
+	font-weight: 600;
+	transition:
+		background 180ms ease,
+		border-color 180ms ease;
+}
+
+.save-text:hover:not(:disabled) {
+	border-color: rgba(64, 158, 255, 0.48);
+	background: rgba(64, 158, 255, 0.16);
+}
+
+.save-text:disabled {
+	opacity: 0.6;
+}
+
+.form-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	padding: 80px 20px;
+	color: var(--pn-muted);
+	font-size: 12px;
+}
+
+.form-body {
+	padding: 18px 18px 0;
+}
+
+.form-hero {
+	display: flex;
+	align-items: flex-start;
+	gap: 13px;
+	padding: 17px;
+	margin-bottom: 20px;
+	border: 1px solid var(--pn-border);
+	border-radius: 16px;
+	background:
+		linear-gradient(140deg, rgba(64, 158, 255, 0.08) 0%, transparent 55%),
+		var(--pn-card);
+}
+
+.hero-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 42px;
+	height: 42px;
+	border: 1px solid rgba(64, 158, 255, 0.22);
+	border-radius: 13px;
+	background: rgba(64, 158, 255, 0.1);
+	color: #8dc5ff;
+}
+
+.hero-copy {
+	min-width: 0;
+}
+
+.eyebrow {
+	color: #8dc5ff;
+	font-size: 9px;
+	font-weight: 600;
+	letter-spacing: 1.35px;
+}
+
+.hero-copy h1 {
+	margin-top: 3px;
+	overflow: hidden;
+	color: var(--pn-text-strong);
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.35px;
+	line-height: 1.3;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.hero-copy p:last-child {
+	margin-top: 5px;
+	color: var(--pn-muted);
+	font-size: 11.5px;
+	line-height: 1.5;
+}
+
+.error-box {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding: 10px 12px;
+	margin-bottom: 18px;
+	border: 1px solid rgba(245, 108, 108, 0.24);
+	border-radius: 10px;
+	background: rgba(245, 108, 108, 0.08);
+	color: #ffaaaa;
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+.form-section {
+	margin-bottom: 21px;
+}
+
+.section-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 9px;
+	padding: 0 3px;
+}
+
+.section-head h2 {
+	color: var(--pn-muted);
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 1.35px;
+	text-transform: uppercase;
+}
+
+.section-head span {
+	color: var(--pn-faint);
+	font-size: 9.5px;
+	letter-spacing: 0.2px;
+}
+
+.section-hint {
+	padding: 8px 4px 0;
+	color: var(--pn-faint);
+	font-size: 10.5px;
+	line-height: 1.5;
+}
+
+.currency {
+	color: var(--pn-muted);
+	font-size: 13px;
+}
+
+.field-hint {
+	color: var(--pn-faint);
+	font-size: 10px;
+	white-space: nowrap;
+}
+
+.switch-list {
+	overflow: hidden;
+	border: 1px solid var(--pn-border);
+	border-radius: var(--pn-radius);
+	background: var(--pn-card);
+}
+
+.switch-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	padding: 14px 16px;
+}
+
+.switch-row + .switch-row {
+	border-top: 1px solid var(--pn-border);
+}
+
+.switch-row div {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.switch-row strong {
+	color: var(--pn-text);
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.switch-row span {
+	color: var(--pn-faint);
+	font-size: 10.5px;
+	line-height: 1.4;
+}
+
+.submit-btn {
+	margin-top: 5px;
+}
+
+.delete-btn {
+	width: 100%;
+	margin-top: 11px;
+	min-height: 46px;
+}
+
+.form-note {
+	margin: 15px 0 0;
+	color: #5e6063;
+	font-size: 10px;
+	text-align: center;
+}
+
+:deep(.van-cell) {
+	padding-top: 12px;
+	padding-bottom: 12px;
+}
+
+:deep(.van-field__left-icon) {
+	margin-right: 7px;
+}
+</style>

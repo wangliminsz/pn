@@ -1,0 +1,837 @@
+# English translations for Django.
+# Copyright (C) 2026
+# This file is distributed under the same license as the Django project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-vue3-admin\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-31 00:00+0000\n"
+"PO-Revision-Date: 2026-03-31 00:00+0000\n"
+"Last-Translator: \n"
+"Language: en\n"
+"Language-Team: English\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: django-vue3-admin i18n phase 1\n"
+
+msgid "error"
+msgstr "error"
+
+msgid "Endpoint address is incorrect"
+msgstr "Endpoint address is incorrect"
+
+msgid "Delete failed: this record has related data bindings"
+msgstr "Delete failed: this record has related data bindings"
+
+msgid "This account has been disabled. Contact an administrator to unlock it."
+msgstr "This account has been disabled. Contact an administrator to unlock it."
+
+msgid "Date format is incorrect"
+msgstr "Date format is incorrect"
+
+msgid "No."
+msgstr "No."
+
+msgid "Import"
+msgstr "Import"
+
+msgid "Template"
+msgstr "Template"
+
+msgid "Export"
+msgstr "Export"
+
+msgid "Update primary key (do not modify)"
+msgstr "Update primary key (do not modify)"
+
+msgid "Please configure the corresponding export template fields."
+msgstr "Please configure the corresponding export template fields."
+
+msgid "Please configure the corresponding import template fields."
+msgstr "Please configure the corresponding import template fields."
+
+msgid "Please configure the corresponding import serializer."
+msgstr "Please configure the corresponding import serializer."
+
+msgid "Please configure the corresponding export serializer."
+msgstr "Please configure the corresponding export serializer."
+
+msgid "Import successful"
+msgstr "Import successful"
+
+msgid "Data export task"
+msgstr "Data export task"
+
+msgid "Import task has been created. Please go to 'Download Center' to wait for download"
+msgstr "Import task has been created. Please go to 'Download Center' to wait for download"
+
+msgid "Create successful"
+msgstr "Create successful"
+
+msgid "Query successful"
+msgstr "Query successful"
+
+msgid "Update successful"
+msgstr "Update successful"
+
+msgid "Delete successful"
+msgstr "Delete successful"
+
+msgid "keys field not provided"
+msgstr "keys field not provided"
+
+msgid "Verification code is required"
+msgstr "Verification code is required"
+
+msgid "Verification code has expired"
+msgstr "Verification code has expired"
+
+msgid "Image verification code is incorrect"
+msgstr "Image verification code is incorrect"
+
+msgid "The account you are logging in with does not exist"
+msgstr "The account you are logging in with does not exist"
+
+msgid "Multiple accounts found for this login. Contact an administrator to check account uniqueness"
+msgstr "Multiple accounts found for this login. Contact an administrator to check account uniqueness"
+
+msgid "Account has been locked. Contact an administrator to unlock"
+msgstr "Account has been locked. Contact an administrator to unlock"
+
+msgid "Username/password incorrect. Account will be locked after {} failed attempts~"
+msgstr "Username/password incorrect. Account will be locked after {} failed attempts~"
+
+msgid "Request successful"
+msgstr "Request successful"
+
+msgid "This interface is not yet available"
+msgstr "This interface is not yet available"
+
+msgid "Logout successful"
+msgstr "Logout successful"
+
+msgid "Username/password incorrect"
+msgstr "Username/password incorrect"
+
+msgid "Username must be unique"
+msgstr "Username must be unique"
+
+msgid "Mobile number must be unique"
+msgstr "Mobile number must be unique"
+
+msgid "Enabled"
+msgstr "Enabled"
+
+msgid "Disabled"
+msgstr "Disabled"
+
+msgid "Username"
+msgstr "Username"
+
+msgid "Full name"
+msgstr "Full name"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Mobile"
+msgstr "Mobile"
+
+msgid "Gender"
+msgstr "Gender"
+
+msgid "Account status"
+msgstr "Account status"
+
+msgid "Last login time"
+msgstr "Last login time"
+
+msgid "Department name"
+msgstr "Department name"
+
+msgid "Department head"
+msgstr "Department head"
+
+msgid "Login username"
+msgstr "Login username"
+
+msgid "Department"
+msgstr "Department"
+
+msgid "Role"
+msgstr "Role"
+
+msgid "No department"
+msgstr "No department"
+
+msgid "Parameters cannot be empty"
+msgstr "Parameters cannot be empty"
+
+msgid "Passwords do not match"
+msgstr "Passwords do not match"
+
+msgid "Old password is incorrect"
+msgstr "Old password is incorrect"
+
+msgid "Invalid language code"
+msgstr "Invalid language code"
+
+msgid "Language updated successfully"
+msgstr "Language updated successfully"
+
+msgid "Only super administrators can reset passwords"
+msgstr "Only super administrators can reset passwords"
+
+msgid "Password reset successful"
+msgstr "Password reset successful"
+
+msgid "User not found"
+msgstr "User not found"
+
+#: dvadmin/system/views/role.py
+msgid "Permission key must be unique"
+msgstr "Permission key must be unique"
+#: dvadmin/system/views/role.py
+msgid "Please select a role"
+msgstr "Please select a role"
+#: dvadmin/system/views/role.py
+msgid "Please select a user"
+msgstr "Please select a user"
+#: dvadmin/system/views/role.py
+msgid "Add successful"
+msgstr "Add successful"
+#: dvadmin/system/views/menu.py
+msgid "Menu does not exist"
+msgstr "Menu does not exist"
+#: dvadmin/system/views/menu.py
+msgid "Move up successful"
+msgstr "Move up successful"
+#: dvadmin/system/views/menu.py
+msgid "Move down successful"
+msgstr "Move down successful"
+#: dvadmin/system/views/dept.py
+msgid "Department does not exist"
+msgstr "Department does not exist"
+#: dvadmin/system/views/role_menu.py
+msgid "Role parameter not provided"
+msgstr "Role parameter not provided"
+#: dvadmin/system/views/role_menu.py
+msgid "Menu parameter not provided"
+msgstr "Menu parameter not provided"
+#: dvadmin/system/views/role_menu.py
+msgid "Save successful"
+msgstr "Save successful"
+#: dvadmin/system/views/system_config.py
+msgid "Variable name already exists"
+msgstr "Variable name already exists"
+#: dvadmin/system/views/system_config.py
+msgid "Query error~"
+msgstr "Query error~"
+#: dvadmin/system/views/system_config.py
+msgid "Association information not found"
+msgstr "Association information not found"
+#: dvadmin/system/views/menu_button.py
+msgid "Batch creation successful"
+msgstr "Batch creation successful"
+#: dvadmin/system/views/menu_button.py
+msgid "Add"
+msgstr "Add"
+#: dvadmin/system/views/menu_button.py
+msgid "Edit"
+msgstr "Edit"
+#: dvadmin/system/views/menu_field.py
+msgid "Model table does not exist"
+msgstr "Model table does not exist"
+#: dvadmin/system/views/menu_field.py
+msgid "Field permission for '%s' already exists and cannot be duplicated"
+msgstr "Field permission for '%s' already exists and cannot be duplicated"
+#: dvadmin/system/views/menu_field.py
+msgid "Match successful"
+msgstr "Match successful"
+#: dvadmin/system/views/message_center.py
+msgid "You have a new message~"
+msgstr "You have a new message~"
+#: dvadmin/system/views/message_center.py
+msgid "You viewed a message~"
+msgstr "You viewed a message~"
+
+# login security (2026-09-10)
+msgid "Multiple matching accounts found. Contact admin"
+msgstr "Multiple matching accounts found. Contact admin"
+
+msgid "Email not verified yet"
+msgstr "Email not verified yet"
+
+msgid "Too many attempts. Retry in about {} min"
+msgstr "Too many attempts. Retry in about {} min"
+
+msgid "Wrong username or password. {} tries left, then locked for {} min"
+msgstr "Wrong username or password. {} tries left, then locked for {} min"
+
+msgid "Too many attempts. Try again later"
+msgstr "Too many attempts. Try again later"
+
+# signup (2026-09-11)
+msgid "Please enter a valid email address"
+msgstr "Please enter a valid email address"
+
+msgid "Company name is required"
+msgstr "Company name is required"
+
+msgid "Password must be at least 8 characters with letters and numbers"
+msgstr "Password must be at least 8 characters with letters and numbers"
+
+msgid "This email is already registered. Please sign in"
+msgstr "This email is already registered. Please sign in"
+
+msgid "Invalid or expired verification link"
+msgstr "Invalid or expired verification link"
+
+msgid "Verification link has expired. Please sign up again"
+msgstr "Verification link has expired. Please sign up again"
+
+# sample onboarding property (2026-09-11)
+msgid "Sample Property (delete me)"
+msgstr "Sample Property (delete me)"
+
+msgid "This is a sample property to help you learn how to add and configure properties. You can delete it after creating your own property."
+msgstr "This is a sample property to help you learn how to add and configure properties. You can delete it after creating your own property."
+
+# org-chart import (2026-09-12)
+msgid "Duplicate rows for account {} with different dept/parent/tier. Keeping the first occurrence."
+msgstr "Duplicate rows for account {} with different dept/parent/tier. Keeping the first occurrence."
+
+# .format-applied after translation (dept/tier values)
+msgid " (dept={}, tier={})"
+msgstr " (dept={}, tier={})"
+
+msgid "Account {} already belongs to another tenant, please use a different one."
+msgstr "Account {} already belongs to another tenant, please use a different one."
+
+# org-chart tree edit / import validation (2026-09-12)
+msgid "Dept is required"
+msgstr "Dept is required"
+
+msgid "Name is required"
+msgstr "Name is required"
+
+msgid "Account is required"
+msgstr "Account is required"
+
+msgid "Unrecognized tier: {}"
+msgstr "Unrecognized tier: {}"
+
+msgid "Account contains invalid characters (only letters/numbers/underscore/hyphen/dot/@ allowed)"
+msgstr "Account contains invalid characters (only letters/numbers/underscore/hyphen/dot/@ allowed)"
+
+msgid "Dept name is required"
+msgstr "Dept name is required"
+
+msgid "Parent dept does not exist"
+msgstr "Parent dept does not exist"
+
+msgid "Dept does not exist"
+msgstr "Dept does not exist"
+
+msgid "Please delete the sub-depts under this dept first"
+msgstr "Please delete the sub-depts under this dept first"
+
+msgid "Please move or delete the members of this dept first"
+msgstr "Please move or delete the members of this dept first"
+
+msgid "Member does not exist"
+msgstr "Member does not exist"
+
+msgid "Account {} already exists"
+msgstr "Account {} already exists"
+
+msgid "Login account must be an email, e.g. name@example.com"
+msgstr "Login account must be an email, e.g. name@example.com"
+
+# google calendar uniqueness (2026-09-12)
+msgid "This Google calendar ID is already used by another tenant"
+msgstr "This Google calendar ID is already used by another tenant"
+
+# password reset email flow (2026-09-12)
+msgid "If this email exists, a reset link has been sent"
+msgstr "If this email exists, a reset link has been sent"
+
+msgid "Reset link is invalid or expired"
+msgstr "Reset link is invalid or expired"
+
+msgid "Reset link has expired, please request a new one"
+msgstr "Reset link has expired, please request a new one"
+
+msgid "Password must be at least 8 characters and contain both letters and numbers"
+msgstr "Password must be at least 8 characters and contain both letters and numbers"
+
+msgid "Password reset, sign in with the new password"
+msgstr "Password reset, sign in with the new password"
+
+# password reset email content (2026-09-12)
+msgid "Reset your password - proNotify"
+msgstr "Reset your password - proNotify"
+
+msgid "Hello,"
+msgstr "Hello,"
+
+msgid "Please click the link below to reset your password (valid for {} minutes):\n\n{}"
+msgstr "Please click the link below to reset your password (valid for {} minutes):\n\n{}"
+
+msgid "If you did not request this, please ignore this email."
+msgstr "If you did not request this, please ignore this email."
+
+msgid "Please click the link below to reset your password (<b>{} minutes</b>):"
+msgstr "Please click the link below to reset your password (<b>{} minutes</b>):"
+
+# signup verification email content (2026-09-12)
+msgid "Verify your email - proNotify"
+msgstr "Verify your email - proNotify"
+
+msgid "Thank you for signing up for proNotify. Please click the link below to verify your email (valid for {} hours):\n\n{}"
+msgstr "Thank you for signing up for proNotify. Please click the link below to verify your email (valid for {} hours):\n\n{}"
+
+msgid "After verification you can complete the payment and activate your account."
+msgstr "After verification you can complete the payment and activate your account."
+
+msgid "Thank you for signing up for <b>proNotify</b>. Please click the link below to verify your email (<b>{} hours</b>):"
+msgstr "Thank you for signing up for <b>proNotify</b>. Please click the link below to verify your email (<b>{} hours</b>):"
+
+# workspace manual-send messages (2026-09-12)
+msgid "Missing property_id"
+msgstr "Missing property_id"
+
+msgid "Tenant is expired or inactive, please renew your plan"
+msgstr "Tenant is expired or inactive, please renew your plan"
+
+msgid "Property does not exist or no access permission"
+msgstr "Property does not exist or no access permission"
+
+msgid "Not within the rent start ~ end period"
+msgstr "Not within the rent start ~ end period"
+
+msgid "This property has no LINE group ID set"
+msgstr "This property has no LINE group ID set"
+
+msgid "Rule does not exist or does not belong to this property"
+msgstr "Rule does not exist or does not belong to this property"
+
+msgid "This rule is disabled"
+msgstr "This rule is disabled"
+
+msgid "Today is not the reminder day for this rule (utility/custom)"
+msgstr "Today is not the reminder day for this rule (utility/custom)"
+
+msgid "Today is not the expiry reminder day for this property"
+msgstr "Today is not the expiry reminder day for this property"
+
+msgid "Today is not the rent reminder day for this property"
+msgstr "Today is not the rent reminder day for this property"
+
+msgid "There is no reminder to send today"
+msgstr "There is no reminder to send today"
+
+msgid "No LINE Bot assigned to this tenant, cannot send"
+msgstr "No LINE Bot assigned to this tenant, cannot send"
+
+msgid "Bot({}) is disabled, cannot send"
+msgstr "Bot({}) is disabled, cannot send"
+
+msgid "Bot ownership check failed, sending rejected"
+msgstr "Bot ownership check failed, sending rejected"
+
+msgid "Sent to the group"
+msgstr "Sent to the group"
+
+msgid "Send failed: cannot connect to LINE or insufficient group permission (check network/proxy and retry)"
+msgstr "Send failed: cannot connect to LINE or insufficient group permission (check network/proxy and retry)"
+
+# broadcast views (2026-09-12)
+msgid "Only tenant managers can broadcast"
+msgstr "Only tenant managers can broadcast"
+
+msgid "No tenant"
+msgstr "No tenant"
+
+msgid "Message content is empty"
+msgstr "Message content is empty"
+
+msgid "Message content cannot exceed 800 characters"
+msgstr "Message content cannot exceed 800 characters"
+
+msgid "No sendable property groups (none have a group ID set)"
+msgstr "No sendable property groups (none have a group ID set)"
+
+msgid "Failed to trigger the background task, please retry later"
+msgstr "Failed to trigger the background task, please retry later"
+
+msgid "Only tenant managers can view"
+msgstr "Only tenant managers can view"
+
+msgid "Missing task_id"
+msgstr "Missing task_id"
+
+msgid "Task does not exist"
+msgstr "Task does not exist"
+
+msgid "No permission to view this task"
+msgstr "No permission to view this task"
+
+msgid "Only tenant managers can clean up"
+msgstr "Only tenant managers can clean up"
+
+# comprehensive i18n sweep (2026-09-12)
+msgid "AI API Key is not configured"
+msgstr "AI API Key is not configured"
+
+msgid "AI config saved"
+msgstr "AI config saved"
+
+msgid "AI parsing failed: {}"
+msgstr "AI parsing failed: {}"
+
+msgid "AI {}, please retry later"
+msgstr "AI {}, please retry later"
+
+msgid "Account not found"
+msgstr "Account not found"
+
+msgid "Account unlocked"
+msgstr "Account unlocked"
+
+msgid "Activation failed, please retry later"
+msgstr "Activation failed, please retry later"
+
+msgid "Already paid and activated, please sign in"
+msgstr "Already paid and activated, please sign in"
+
+msgid "Batch created {} items, skipped {} items (already exist)"
+msgstr "Batch created {} items, skipped {} items (already exist)"
+
+msgid "Calendar sync exception: {}"
+msgstr "Calendar sync exception: {}"
+
+msgid "Cannot connect to the AI service (network/proxy issue), please retry later"
+msgstr "Cannot connect to the AI service (network/proxy issue), please retry later"
+
+msgid "Cannot disable the currently logged-in superuser account"
+msgstr "Cannot disable the currently logged-in superuser account"
+
+msgid "Cannot reset your own password here (use personal center)"
+msgstr "Cannot reset your own password here (use personal center)"
+
+msgid "Company name cannot be empty"
+msgstr "Company name cannot be empty"
+
+msgid "Company name is missing"
+msgstr "Company name is missing"
+
+msgid "Company name updated"
+msgstr "Company name updated"
+
+msgid "Completed, {} reminders sent"
+msgstr "Completed, {} reminders sent"
+
+msgid "Created {} items, skipped {} items (already exist)"
+msgstr "Created {} items, skipped {} items (already exist)"
+
+msgid "Daily reminder time updated to Thailand time {:02d}:{:02d} and is now in effect"
+msgstr "Daily reminder time updated to Thailand time {:02d}:{:02d} and is now in effect"
+
+msgid "Data parse failed: {}"
+msgstr "Data parse failed: {}"
+
+msgid "Default password saved"
+msgstr "Default password saved"
+
+msgid "Dept deleted"
+msgstr "Dept deleted"
+
+msgid "Dept saved"
+msgstr "Dept saved"
+
+msgid "Email verified successfully"
+msgstr "Email verified successfully"
+
+msgid "Failed to create charge"
+msgstr "Failed to create charge"
+
+msgid "Failed to query DeepL quota"
+msgstr "Failed to query DeepL quota"
+
+msgid "Fetched successfully"
+msgstr "Fetched successfully"
+
+msgid "File parse failed: {}"
+msgstr "File parse failed: {}"
+
+msgid "Google calendar saved, but sync failed"
+msgstr "Google calendar saved, but sync failed"
+
+msgid "Google calendar updated, synced {}, failed {}"
+msgstr "Google calendar updated, synced {}, failed {}"
+
+msgid "Import completed: {} properties added"
+msgstr "Import completed: {} properties added"
+
+msgid "Linebot assigned"
+msgstr "Linebot assigned"
+
+msgid "Login security settings saved"
+msgstr "Login security settings saved"
+
+msgid "Member deleted"
+msgstr "Member deleted"
+
+msgid "Member saved"
+msgstr "Member saved"
+
+msgid "Missing charge_id"
+msgstr "Missing charge_id"
+
+msgid "Missing property"
+msgstr "Missing property"
+
+msgid "Missing user ID"
+msgstr "Missing user ID"
+
+msgid "No data"
+msgstr "No data"
+
+msgid "No file received"
+msgstr "No file received"
+
+msgid "No permission to manage this tenant's calendar settings"
+msgstr "No permission to manage this tenant's calendar settings"
+
+msgid "No permission to manage this tenant's company name"
+msgstr "No permission to manage this tenant's company name"
+
+msgid "No permission to manage this tenant's org chart"
+msgstr "No permission to manage this tenant's org chart"
+
+msgid "No permission to manage this tenant's signature settings"
+msgstr "No permission to manage this tenant's signature settings"
+
+msgid "No permission to operate this payment record"
+msgstr "No permission to operate this payment record"
+
+msgid "No permission to operate this role"
+msgstr "No permission to operate this role"
+
+msgid "No permission to view this payment record"
+msgstr "No permission to view this payment record"
+
+msgid "No tenant, no permission"
+msgstr "No tenant, no permission"
+
+msgid "No tenant, no permission to operate this role"
+msgstr "No tenant, no permission to operate this role"
+
+msgid "No valid data rows parsed"
+msgstr "No valid data rows parsed"
+
+msgid "No views module found under App '{}'"
+msgstr "No views module found under App '{}'"
+
+msgid "Not in dev/test mode, cannot simulate"
+msgstr "Not in dev/test mode, cannot simulate"
+
+msgid "Omise did not return a QR code"
+msgstr "Omise did not return a QR code"
+
+msgid "Only superuser or this tenant manager can reset password"
+msgstr "Only superuser or this tenant manager can reset password"
+
+msgid "Only tenant managers can renew"
+msgstr "Only tenant managers can renew"
+
+msgid "Org chart cleared (members {}, depts {})"
+msgstr "Org chart cleared (members {}, depts {})"
+
+msgid "Org chart import completed"
+msgstr "Org chart import completed"
+
+msgid "Password cannot be empty"
+msgstr "Password cannot be empty"
+
+msgid "Password has been reset"
+msgstr "Password has been reset"
+
+msgid "Password must be at least 8 characters"
+msgstr "Password must be at least 8 characters"
+
+msgid "Payment gateway is not enabled"
+msgstr "Payment gateway is not enabled"
+
+msgid "Payment record does not exist"
+msgstr "Payment record does not exist"
+
+msgid "Permission key already exists in this tenant"
+msgstr "Permission key already exists in this tenant"
+
+msgid "Please complete the payment activation first"
+msgstr "Please complete the payment activation first"
+
+msgid "Please enter the email or username to unlock"
+msgstr "Please enter the email or username to unlock"
+
+msgid "Please enter the property description to add"
+msgstr "Please enter the property description to add"
+
+msgid "Please upload a CSV/Excel file, or provide rows"
+msgstr "Please upload a CSV/Excel file, or provide rows"
+
+msgid "Please upload a file or provide a rows array"
+msgstr "Please upload a file or provide a rows array"
+
+msgid "Preview generated"
+msgstr "Preview generated"
+
+msgid "Property does not exist or is not within your data scope"
+msgstr "Property does not exist or is not within your data scope"
+
+msgid "Property does not exist or no permission to view"
+msgstr "Property does not exist or no permission to view"
+
+msgid "Renewal amount is not configured"
+msgstr "Renewal amount is not configured"
+
+msgid "Role name already exists in this tenant"
+msgstr "Role name already exists in this tenant"
+
+msgid "Saved but sync failed: {}"
+msgstr "Saved but sync failed: {}"
+
+msgid "Self-service signup mode saved"
+msgstr "Self-service signup mode saved"
+
+msgid "Signature updated"
+msgstr "Signature updated"
+
+msgid "Sync completed: {} succeeded, {} failed"
+msgstr "Sync completed: {} succeeded, {} failed"
+
+msgid "Sync exception: {}"
+msgstr "Sync exception: {}"
+
+msgid "Tenant activated, please sign in again"
+msgstr "Tenant activated, please sign in again"
+
+msgid "Tenant does not exist"
+msgstr "Tenant does not exist"
+
+msgid "The app parameter is required"
+msgstr "The app parameter is required"
+
+msgid "The menu_id parameter is required"
+msgstr "The menu_id parameter is required"
+
+msgid "This account already has a tenant, no need to sign up"
+msgstr "This account already has a tenant, no need to sign up"
+
+msgid "This account already has a tenant, please sign in directly"
+msgstr "This account already has a tenant, please sign in directly"
+
+msgid "This email is already in use"
+msgstr "This email is already in use"
+
+msgid "This email is already verified, please complete the payment to activate your account"
+msgstr "This email is already verified, please complete the payment to activate your account"
+
+msgid "This menu has no component name (component_name), cannot auto-generate permissions"
+msgstr "This menu has no component name (component_name), cannot auto-generate permissions"
+
+msgid "This property is not within your data scope"
+msgstr "This property is not within your data scope"
+
+msgid "Trigger failed"
+msgstr "Trigger failed"
+
+msgid "Updated {} items"
+msgstr "Updated {} items"
+
+msgid "Uploaded {} files"
+msgstr "Uploaded {} files"
+
+msgid "User does not exist"
+msgstr "User does not exist"
+
+msgid "Verification email sent, please check your inbox (valid for 24 hours)"
+msgstr "Verification email sent, please check your inbox (valid for 24 hours)"
+
+msgid "Your account has no tenant, cannot renew"
+msgstr "Your account has no tenant, cannot renew"
+
+msgid "base config item not found"
+msgstr "base config item not found"
+
+msgid "base64"
+msgstr "base64"
+
+msgid "buttons cannot be empty"
+msgstr "buttons cannot be empty"
+
+msgid "logging"
+msgstr "logging"
+
+msgid "service error"
+msgstr "service error"
+
+msgid "service rate-limited/overloaded"
+msgstr "service rate-limited/overloaded"
+
+msgid "{} must be a positive integer"
+msgstr "{} must be a positive integer"
+
+msgid "Room name is required"
+msgstr "Room name is required"
+
+msgid "Rent cannot be negative"
+msgstr "Rent cannot be negative"
+
+msgid "Rent not recognized: {}"
+msgstr "Rent not recognized: {}"
+
+msgid "Payment period not recognized: {}"
+msgstr "Payment period not recognized: {}"
+
+msgid "Reminder day must be 1-31"
+msgstr "Reminder day must be 1-31"
+
+msgid "Reminder day not recognized: {}"
+msgstr "Reminder day not recognized: {}"
+
+msgid "Rent start date not recognized: {}"
+msgstr "Rent start date not recognized: {}"
+
+msgid "Rent end date not recognized: {}"
+msgstr "Rent end date not recognized: {}"
+
+msgid "Rent start date cannot be later than rent end date"
+msgstr "Rent start date cannot be later than rent end date"
+
+msgid "Owner account contains invalid characters"
+msgstr "Owner account contains invalid characters"
+
+msgid "Owner account not found in this tenant: {}"
+msgstr "Owner account not found in this tenant: {}"
+
+msgid "Line Bot not found in this tenant: {}"
+msgstr "Line Bot not found in this tenant: {}"
+
+msgid "Room name"
+msgstr "Room name"
+
+msgid "Rent start date"
+msgstr "Rent start date"
+
+msgid "Rent end date"
+msgstr "Rent end date"
+
+msgid "Rent start date must be earlier than rent end date"
+msgstr "Rent start date must be earlier than rent end date"
+

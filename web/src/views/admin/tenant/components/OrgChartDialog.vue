@@ -1,0 +1,1081 @@
+<template>
+	<div class="org-inline">
+		<el-tabs v-model="activeTab" class="org-tabs">
+			<!-- 树形编辑 -->
+			<el-tab-pane :label="$t('message.pages.orgChart.tabTree')" name="tree">
+				<div class="tree-toolbar">
+					<el-button :loading="treeLoading" @click="loadTree">
+						<el-icon style="margin-right:4px"><ele-Refresh /></el-icon>{{ $t('message.pages.orgChart.refresh') }}
+					</el-button>
+					<el-button type="primary" @click="addTopDept">
+						<el-icon style="margin-right:4px"><ele-Plus /></el-icon>{{ $t('message.pages.orgChart.topDept') }}
+					</el-button>
+					<el-button type="primary" @click="addTopMember">
+						<el-icon style="margin-right:4px"><ele-Plus /></el-icon>{{ $t('message.pages.orgChart.companyMembers') }}
+					</el-button>
+					<span class="toolbar-grow"></span>
+					<el-button class="soft-btn" @click="expandAll">
+						<el-icon style="margin-right:4px"><ele-Expand /></el-icon>{{ $t('message.pages.orgChart.expandAll') }}
+					</el-button>
+					<el-button class="soft-btn" @click="collapseAll">
+						<el-icon style="margin-right:4px"><ele-Fold /></el-icon>{{ $t('message.pages.orgChart.collapseAll') }}
+					</el-button>
+					<span class="hint">{{ $t('message.pages.orgChart.hint') }}</span>
+				</div>
+				<div v-if="treeData" class="tree-box">
+					<el-tree ref="treeRef" :data="treeData" :props="treeProps" node-key="id" default-expand-all highlight-current>
+						<template #default="{ data }">
+							<span class="tree-node" @click.stop>
+								<template v-if="data.type === 'dept'">
+									<el-icon class="dept-ico"><ele-FolderOpened /></el-icon>
+									<span class="t-name">{{ data.name }}</span>
+								</template>
+								<template v-else-if="data.type === 'tenant'">
+									<el-icon class="tenant-ico"><ele-OfficeBuilding /></el-icon>
+									<span class="t-name">{{ data.name }}</span>
+								</template>
+								<template v-else>
+								<el-icon class="user-ico"><ele-User /></el-icon>
+								<span class="t-name">{{ data.name || data.username }}</span>
+								<span class="t-username" v-if="data.username">@{{ data.username }}</span>
+								<span class="t-mobile" v-if="data.mobile">{{ data.mobile }}</span>
+								<el-tag v-if="data.tier" :type="tierTag(data.tier)" size="small" effect="plain">{{ tierLabel(data.tier) }}</el-tag>
+								<el-tag v-if="data.data_range !== null && data.data_range !== undefined && data.data_range !== ''" :type="rangeTag(String(data.data_range))" size="small" effect="plain" class="range-tag">{{ dataRangeLabel(data.data_range) }}</el-tag>
+							</template>
+								<span class="node-actions">
+									<template v-if="data.type === 'tenant'">
+										<el-button link size="small" :title="$t('message.pages.orgChart.editCompanyName')" @click.stop="editCompanyName(data)">{{ $t('message.pages.orgChart.editCompanyName') }}</el-button>
+										<el-button link size="small" :title="$t('message.pages.orgChart.clearOrg')" @click.stop="clearOrg(data)">{{ $t('message.pages.orgChart.clearOrg') }}</el-button>
+									</template>
+									<template v-else-if="data.type === 'dept'">
+										<el-button link size="small" :title="$t('message.pages.orgChart.subDept')" @click.stop="addSubDept(data)"><el-icon><ele-Plus /></el-icon>{{ $t('message.pages.orgChart.subDept') }}</el-button>
+										<el-button link size="small" :title="$t('message.pages.orgChart.member')" @click.stop="addDeptMember(data)"><el-icon><ele-User /></el-icon>{{ $t('message.pages.orgChart.member') }}</el-button>
+										<el-button link size="small" @click.stop="editDept(data)">{{ $t('message.pages.orgChart.rename') }}</el-button>
+										<el-button link type="danger" size="small" @click.stop="delDept(data)">{{ $t('message.pages.orgChart.del') }}</el-button>
+									</template>
+									<template v-else>
+										<el-button link size="small" @click.stop="editMember(data)">{{ $t('message.pages.orgChart.edit') }}</el-button>
+										<el-button link type="danger" size="small" @click.stop="delMember(data)">{{ $t('message.pages.orgChart.del') }}</el-button>
+									</template>
+								</span>
+							</span>
+						</template>
+					</el-tree>
+				</div>
+				<div v-else class="empty">{{ $t('message.pages.orgChart.emptyTree') }}</div>
+			</el-tab-pane>
+
+			<!-- 批量导入 -->
+			<el-tab-pane :label="$t('message.pages.orgChart.tabImport')" name="import">
+				<div class="import-toolbar">
+					<el-dropdown @command="downloadTemplate" trigger="click">
+						<el-button>
+							<el-icon style="margin-right:4px"><ele-Download /></el-icon>{{ $t('message.pages.orgChart.downloadTemplate') }}
+							<el-icon style="margin-left:4px"><ele-ArrowDown /></el-icon>
+						</el-button>
+						<template #dropdown>
+							<el-dropdown-menu>
+								<el-dropdown-item command="cn">{{ $t('message.pages.orgChart.templateZh') }}</el-dropdown-item>
+								<el-dropdown-item command="en">{{ $t('message.pages.orgChart.templateEn') }}</el-dropdown-item>
+							</el-dropdown-menu>
+						</template>
+					</el-dropdown>
+					<el-upload :show-file-list="false" :auto-upload="false" accept=".csv,.xls,.xlsx"
+						:on-change="onFileChange">
+						<el-button type="primary">
+							<el-icon style="margin-right:4px"><ele-Upload /></el-icon>{{ $t('message.pages.orgChart.chooseFile') }}
+						</el-button>
+					</el-upload>
+					<span v-if="uploadFile" class="file-badge">
+						<el-icon style="margin-right:4px"><ele-Document /></el-icon>
+						{{ uploadFile.name }}
+					</span>
+					<el-button type="primary" :loading="previewing" :disabled="!uploadFile" @click="preview">
+						<el-icon style="margin-right:4px"><ele-MagicStick /></el-icon>{{ $t('message.pages.orgChart.preview') }}
+					</el-button>
+				</div>
+				<div class="toolbar-tip" v-if="uploadFile && !previewData">{{ $t('message.pages.orgChart.fileLoadedTip', { name: uploadFile.name }) }}</div>
+				<!-- {{ $t('message.pages.orgChart.accountTip') }} -->
+				<div class="toolbar-tip" v-else><span v-if="defaultPassword" class="acc-pwd">{{ $t('message.pages.orgChart.defaultPwdTip', { pw: defaultPassword }) }}</span></div>
+
+				<!-- 预览结果 -->
+				<template v-if="previewData">
+					<div class="stats">
+						<div class="stat"><span class="n">{{ previewData.stats.dept_new }}</span><span class="l">{{ $t('message.pages.orgChart.newDept') }}</span></div>
+						<div class="stat"><span class="n">{{ previewData.stats.dept_exist }}</span><span class="l">{{ $t('message.pages.orgChart.existingDept') }}</span></div>
+						<div class="stat" :class="{ warn: previewData.stats.dept_only_rows }"><span class="n">{{ previewData.stats.dept_only_rows }}</span><span class="l">{{ $t('message.pages.orgChart.deptOnly') }}</span></div>
+						<div class="stat"><span class="n">{{ previewData.stats.user_new }}</span><span class="l">{{ $t('message.pages.orgChart.newAccounts') }}</span></div>
+						<div class="stat"><span class="n">{{ previewData.stats.user_update }}</span><span class="l">{{ $t('message.pages.orgChart.updateAccounts') }}</span></div>
+						<div class="stat" :class="{ bad: previewData.stats.user_conflict }"><span class="n">{{ previewData.stats.user_conflict }}</span><span class="l">{{ $t('message.pages.orgChart.accountConflict') }}</span></div>
+						<div class="stat" :class="{ warn: previewData.stats.duplicate_rows }"><span class="n">{{ previewData.stats.duplicate_rows }}</span><span class="l">{{ $t('message.pages.orgChart.duplicateRows') }}</span></div>
+						<div class="stat" :class="{ warn: previewData.stats.conflict_rows }"><span class="n">{{ previewData.stats.conflict_rows }}</span><span class="l">{{ $t('message.pages.orgChart.conflictRows') }}</span></div>
+						<div class="stat" :class="{ bad: previewData.stats.invalid_rows }"><span class="n">{{ previewData.stats.invalid_rows }}</span><span class="l">{{ $t('message.pages.orgChart.errorRows') }}</span></div>
+					</div>
+
+					<div class="preview-table">
+						<el-table :data="previewData.rows" size="small" max-height="300" :header-cell-style="headerStyle">
+							<el-table-column type="index" width="46" />
+							<el-table-column :label="$t('message.pages.orgChart.dept')" prop="dept" min-width="110" />
+							<el-table-column :label="$t('message.pages.orgChart.parentDept')" prop="parent" min-width="100" />
+							<el-table-column :label="$t('message.pages.orgChart.name')" prop="name" min-width="90" />
+							<el-table-column :label="$t('message.pages.orgChart.account')" min-width="200">
+								<template #default="{ row }">
+									<div class="acc-cell" v-if="row.username">
+										<span class="acc-name">{{ row.username }}</span>
+										<span v-if="!row.is_existing" class="acc-hint">{{ $t('message.pages.orgChart.defaultPwdTip', { pw: previewData?.default_password }) }}</span>
+									</div>
+									<span v-else class="muted">—</span>
+								</template>
+							</el-table-column>
+							<el-table-column :label="$t('message.pages.orgChart.mobile')" prop="mobile" min-width="110" />
+							<el-table-column :label="$t('message.pages.orgChart.tier')" min-width="80">
+								<template #default="{ row }">
+									<span v-if="row.is_dept_only" class="muted">—</span>
+									<el-tag v-else-if="row.tier" :type="tierTag(row.tier)" size="small" effect="plain">{{ tierLabel(row.tier) }}</el-tag>
+									<span v-else class="err">{{ row.tier_raw || '-' }}</span>
+								</template>
+							</el-table-column>
+							<el-table-column :label="$t('message.pages.orgChart.status')" min-width="130">
+								<template #default="{ row }">
+									<span v-if="row.errors && row.errors.length" class="err">✕ {{ row.errors.join('、') }}</span>
+									<span v-else-if="row.is_dept_only" class="muted">{{ $t('message.pages.orgChart.deptOnlyStatus') }}</span>
+									<span v-else-if="row.dup_status === 'duplicate'" class="warn">{{ $t('message.pages.orgChart.duplicateStatus') }}</span>
+									<span v-else-if="row.dup_status === 'conflict'" class="warn">{{ $t('message.pages.orgChart.conflictStatus') }}</span>
+									<span v-else class="ok">{{ $t('message.pages.orgChart.valid') }}</span>
+								</template>
+							</el-table-column>
+						</el-table>
+					</div>
+
+					<div v-if="previewData.errors.length" class="err-box">
+						<div v-for="(e, i) in previewData.errors" :key="i" class="err-line">
+							{{ e.row ? $t('message.pages.orgChart.rowLine', { n: e.row }) : '' }}{{ e.msg }}
+						</div>
+					</div>
+
+					<div class="commit-bar">
+						<span class="commit-tip">
+							{{ $t('message.pages.orgChart.commitTip', { dept_new: previewData.stats.dept_new, dept_only: previewData.stats.dept_only_rows, user_new: previewData.stats.user_new, skip: (previewData.stats.duplicate_rows || previewData.stats.conflict_rows) ? $t('message.pages.orgChart.skipNote', { n: previewData.stats.duplicate_rows + previewData.stats.conflict_rows }) : '' }) }}
+						</span>
+						<el-button type="primary" :loading="committing" :disabled="!canCommit"
+							@click="commit">
+							<el-icon style="margin-right:4px"><ele-Finished /></el-icon>{{ $t('message.pages.orgChart.confirmImport') }}
+						</el-button>
+					</div>
+				</template>
+
+				<div v-else-if="uploadFile && !previewData" class="empty">
+					<div class="empty-tip">{{ $t('message.pages.orgChart.fileLoadedTip', { name: uploadFile.name }) }}</div>
+					<el-button type="primary" :loading="previewing" @click="preview">
+						<el-icon style="margin-right:4px"><ele-MagicStick /></el-icon>{{ $t('message.pages.orgChart.preview') }}
+					</el-button>
+				</div>
+				<div v-else class="empty">
+					{{ $t('message.pages.orgChart.selectFileFirst') }}
+					<div></div>
+					<span v-if="defaultPassword" class="acc-pwd">{{ $t('message.pages.orgChart.defaultPwdTip', { pw: defaultPassword }) }}</span>
+
+				</div>
+			</el-tab-pane>
+		</el-tabs>
+
+		<!-- 部门 新增/编辑 -->
+		<el-dialog v-model="deptDlgVisible" :title="deptForm.id ? $t('message.pages.orgChart.editDeptTitle') : $t('message.pages.orgChart.addDeptTitle')" width="560px" append-to-body destroy-on-close
+			:close-on-click-modal="false" :close-on-press-escape="false">
+			<el-form :model="deptForm" label-width="140px" label-position="left">
+				<el-form-item :label="$t('message.pages.orgChart.deptName')" required>
+					<el-input v-model="deptForm.name" :placeholder="$t('message.pages.orgChart.deptNamePlaceholder')" />
+				</el-form-item>
+				<el-form-item :label="$t('message.pages.orgChart.parentDeptLabel')">
+					<el-select v-model="deptForm.parent_id" :placeholder="$t('message.pages.orgChart.parentDeptPlaceholder')" clearable style="width:100%">
+						<el-option v-for="d in deptOptions" :key="d.id" :label="d.label" :value="d.id" />
+					</el-select>
+					<div class="form-tip">{{ $t('message.pages.orgChart.parentDeptTip') }}</div>
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<el-button @click="deptDlgVisible = false">{{ $t('message.pages.orgChart.cancel') }}</el-button>
+				<el-button type="primary" :loading="deptSaving" @click="saveDept">{{ $t('message.pages.orgChart.save') }}</el-button>
+			</template>
+		</el-dialog>
+
+		<!-- 成员 新增/编辑 -->
+		<el-dialog v-model="memberDlgVisible" :title="memberForm.id ? $t('message.pages.orgChart.editMemberTitle') : $t('message.pages.orgChart.addMemberTitle')" width="640px" append-to-body destroy-on-close
+			:close-on-click-modal="false" :close-on-press-escape="false">
+			<el-form :model="memberForm" label-width="140px" label-position="left">
+				<el-form-item :label="$t('message.pages.orgChart.account')" required>
+					<el-input v-model="memberForm.username" :placeholder="$t('message.pages.orgChart.accountPlaceholder')" :disabled="!!memberForm.id" />
+					<div class="form-tip account-tip">{{ memberForm.id ? $t('message.pages.orgChart.accountTipEdit') : $t('message.pages.orgChart.accountTipAdd') }}</div>
+					<div v-if="!memberForm.id && defaultPassword" class="member-pwd-tip">
+						{{ $t('message.pages.orgChart.defaultPwdTip', { pw: defaultPassword }) }}
+					</div>
+				</el-form-item>
+				<el-form-item :label="$t('message.pages.orgChart.name')" required>
+					<el-input v-model="memberForm.name" :placeholder="$t('message.pages.orgChart.namePlaceholder')" />
+				</el-form-item>
+				<el-form-item :label="$t('message.pages.orgChart.mobileLabel')">
+					<el-input v-model="memberForm.mobile" :placeholder="$t('message.pages.orgChart.mobilePlaceholder')" />
+				</el-form-item>
+				<el-form-item :label="$t('message.pages.orgChart.deptLabel')">
+					<el-select v-model="memberForm.dept_id" :placeholder="$t('message.pages.orgChart.deptPlaceholder')" clearable style="width:100%">
+						<el-option v-for="d in deptOptions" :key="d.id" :label="d.label" :value="d.id" />
+					</el-select>
+				</el-form-item>
+				<el-form-item :label="$t('message.pages.orgChart.tierLabel')" required>
+					<el-select v-model="memberForm.tier" :placeholder="$t('message.pages.orgChart.tierPlaceholder')" style="width:100%">
+						<el-option :label="$t('message.pages.orgChart.manager')" value="manager" />
+						<el-option :label="$t('message.pages.orgChart.supervisor')" value="supervisor" />
+						<el-option :label="$t('message.pages.orgChart.staff')" value="staff" />
+					</el-select>
+				</el-form-item>
+				<el-form-item :label="$t('message.pages.orgChart.isActive')">
+					<el-switch v-model="memberForm.is_active" />
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<el-button v-if="memberForm.id" class="footer-del" type="danger" plain @click="delMember(memberForm)">{{ $t('message.pages.orgChart.delete') }}</el-button>
+				<el-button v-if="memberForm.id" plain @click="resetMemberPwd(memberForm)">{{ $t('message.pages.orgChart.resetPwd') }}</el-button>
+				<div class="footer-spacer"></div>
+				<el-button type="primary" :loading="memberSaving" @click="saveMember">{{ $t('message.pages.orgChart.save') }}</el-button>
+				<el-button @click="memberDlgVisible = false">{{ $t('message.pages.orgChart.cancel') }}</el-button>
+			</template>
+		</el-dialog>
+
+		<!-- 公司名称 修改 -->
+		<el-dialog v-model="nameDlgVisible" :title="$t('message.pages.orgChart.editCompanyTitle')" width="560px" append-to-body destroy-on-close
+			:close-on-click-modal="false" :close-on-press-escape="false">
+			<el-form :model="nameForm" label-width="140px" label-position="left">
+				<el-form-item :label="$t('message.pages.orgChart.companyName')" required>
+					<el-input v-model="nameForm.name" :placeholder="$t('message.pages.orgChart.companyNamePlaceholder')" maxlength="128" />
+				</el-form-item>
+				<div class="form-tip">{{ $t('message.pages.orgChart.companyNameTip') }}</div>
+			</el-form>
+			<template #footer>
+				<div class="footer-spacer"></div>
+				<el-button type="primary" :loading="nameSaving" @click="saveCompanyName">{{ $t('message.pages.orgChart.save') }}</el-button>
+				<el-button @click="nameDlgVisible = false">{{ $t('message.pages.orgChart.cancel') }}</el-button>
+			</template>
+		</el-dialog>
+	</div>
+</template>
+
+<script lang="ts" setup name="OrgChartDialog">
+import { ref, computed, watch, onMounted } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { useI18n } from 'vue-i18n';
+import * as api from './orgchartApi';
+
+const { t } = useI18n();
+
+const props = defineProps<{ modelValue: boolean; tenant: any; inline?: boolean }>();
+const emit = defineEmits(['update:modelValue', 'imported']);
+
+const activeTab = ref('tree');
+const headerStyle = { background: '#1f1f1f', color: '#b1b4b8', borderColor: '#2a2a2a' };
+
+// 内联模式: 挂载即预加载组织树
+onMounted(() => {
+	if (props.inline) {
+		activeTab.value = 'tree';
+		loadTree();
+	}
+});
+
+// 弹窗打开时: 切到树形编辑页(默认), 并预加载组织树
+watch(
+	() => props.modelValue,
+	(v) => {
+		if (v) {
+			activeTab.value = 'tree';
+			loadTree();
+		}
+	}
+);
+
+// 切到批量导入页时: 拉取默认密码(供"账号"提示展示), 只需一次
+watch(activeTab, (tab) => {
+	if (tab === 'import' && !templateLoaded.value) {
+		templateLoaded.value = true;
+		loadTemplateMeta();
+	}
+});
+
+// ---- 导入 ----
+	const uploadFile = ref<File | null>(null);
+	const previewing = ref(false);
+const committing = ref(false);
+const previewData = ref<any>(null);
+const defaultPassword = ref('');
+const templateLoaded = ref(false);
+
+const loadTemplateMeta = async () => {
+	try {
+		const res: any = await api.GetOrgTemplate(props.tenant?.id);
+		defaultPassword.value = res.data?.default_password || '';
+	} catch (e) {
+		console.error(e);
+	}
+};
+
+const onFileChange = (file: any) => {
+	uploadFile.value = file.raw;
+	previewData.value = null;
+};
+
+const buildForm = (dryRun: boolean) => {
+	const fd = new FormData();
+	// 加 UTF-8 BOM, 避免 Excel 中文乱码
+	if (uploadFile.value) {
+		fd.append('file', uploadFile.value);
+	}
+	fd.append('dry_run', String(dryRun));
+	return fd;
+};
+
+const preview = async () => {
+	if (!uploadFile.value) {
+		ElMessage.warning(t('message.pages.orgChart.selectFileFirst'));
+		return;
+	}
+	previewing.value = true;
+	try {
+		const res: any = await api.ImportOrgChart(props.tenant?.id, buildForm(true));
+		previewData.value = res.data;
+		previewData.value.stats = res.data.stats || {};
+		previewData.value.errors = res.data.errors || [];
+		ElMessage.success(t('message.pages.orgChart.previewReady'));
+	} catch (e) {
+		console.error(e);
+	} finally {
+		previewing.value = false;
+	}
+};
+
+const canCommit = computed(() => {
+	if (!previewData.value) return false;
+	const s = previewData.value.stats || {};
+	return s.valid_rows > 0 && s.user_conflict === 0 && s.invalid_rows === 0;
+});
+
+const commit = async () => {
+	committing.value = true;
+	try {
+		const res: any = await api.ImportOrgChart(props.tenant?.id, buildForm(false));
+		const d = res.data || {};
+		ElMessage.success(t('message.pages.orgChart.importDone', { dept_new: d.dept_new, user_new: d.user_new, default_password: d.default_password }));
+		previewData.value = null;
+		uploadFile.value = null;
+		emit('imported');
+		activeTab.value = 'tree';
+		loadTree();
+	} catch (e) {
+		console.error(e);
+	} finally {
+		committing.value = false;
+	}
+};
+
+const downloadTemplate = (lang: 'cn' | 'en' = 'cn') => {
+	// 中文/English 仅表头不同, 内容一致
+	const rows = [
+		['company', '', 'Jane Doe', 'jane_doe@gmail.com', '0607550001', 'manager'],
+		['Dept_1', '', 'John Doe', 'john_doe@gmail.com', '0800316001', 'supervisor'],
+		['Team_1', 'Dept_1', 'John Smith', 'john_smith@gmail.com', '0800316002', 'staff'],
+		['Dept_2', '', '', '', '', ''],
+		['Team_2', 'Dept_2', 'Jane Smith', 'jane_smith@gmail.com', '0900852002', 'staff'],
+	];
+	const headers = lang === 'en'
+		? ['Department', 'Parent_Dept', 'Name', 'Account', 'Mobile', 'Role']
+		: ['部门', '上级部门', '姓名', '账号', '手机', '职级'];
+	const csv = '\uFEFF' + [headers, ...rows].map((r) => r.join(',')).join('\n');
+	const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+	const el = document.createElement('a');
+	el.href = URL.createObjectURL(blob);
+	const suffix = lang === 'en' ? `_en_${props.tenant?.tenant_code || 'tenant'}` : `_${props.tenant?.tenant_code || 'tenant'}`;
+	el.download = `org_chart_template${suffix}.csv`;
+	el.click();
+	URL.revokeObjectURL(el.href);
+};
+
+const tierLabel = (tier: string) => ({ manager: t('message.pages.orgChart.manager'), supervisor: t('message.pages.orgChart.supervisor'), staff: t('message.pages.orgChart.staff') }[tier] || tier);
+const tierTag = (tier: string) => ({ manager: 'success', supervisor: 'warning', staff: 'info' }[tier] || 'info');
+
+// 数据范围标签 i18n(与后端 data_range 数字对应)
+const dataRangeLabel = (dr: any) =>
+	({ '0': t('message.pages.orgChart.dataRange0'), '1': t('message.pages.orgChart.dataRange1'), '2': t('message.pages.orgChart.dataRange2'), '3': t('message.pages.orgChart.dataRange3'), '4': t('message.pages.orgChart.dataRange4') }[String(dr)] || String(dr));
+// 数据范围标签配色: 全租户=蓝, 本部门及以下=绿, 本部门=青, 仅本人=灰, 自定义=紫
+const rangeTag = (dr: any) => {
+	const s = String(dr ?? '');
+	if (s.startsWith('3')) return 'primary';
+	if (s.startsWith('1')) return 'success';
+	if (s.startsWith('2')) return 'info';
+	if (s.startsWith('0')) return 'info';
+	return 'warning';
+};
+
+// ---- 树形 ----
+const treeLoading = ref(false);
+const treeData = ref<any[]>([]);
+const treeProps = { label: 'name', children: 'children' };
+const treeRef = ref<any>(null);
+
+// 遍历 store 内所有节点并调用 expand/collapse(EP 的 Node 提供这两个方法, 且内部处理子节点可见性/焦点)
+const walkNodes = (nodes: any[], fn: (n: any) => void) => {
+	(nodes || []).forEach((n: any) => {
+		fn(n);
+		if (n.childNodes && n.childNodes.length) walkNodes(n.childNodes, fn);
+	});
+};
+
+const expandAll = () => {
+	const store = treeRef.value?.store;
+	if (!store) return;
+	walkNodes(store.root?.childNodes || [], (n) => n && typeof n.expand === 'function' && n.expand());
+};
+const collapseAll = () => {
+	const store = treeRef.value?.store;
+	if (!store) return;
+	// 先确保显示的根节点(顶层)保持展开, 再向下收: 只折叠"根之下的所有非叶节点(各部门)"
+	(store.root?.childNodes || []).forEach((top: any) => {
+		if (top && typeof top.expand === 'function') top.expand();
+	});
+	const walk = (nodes: any[], fn: (n: any) => void) => {
+		(nodes || []).forEach((n: any) => {
+			fn(n);
+			if (n.childNodes && n.childNodes.length) walk(n.childNodes, fn);
+		});
+	};
+	(store.root?.childNodes || []).forEach((top: any) => {
+		if (top && top.childNodes && top.childNodes.length) {
+			walk(top.childNodes, (n: any) => n && !n.isLeaf && typeof n.collapse === 'function' && n.collapse());
+		}
+	});
+};
+
+const toTree = (node: any): any => {
+	const children: any[] = [];
+	// 先成员(本级人员, 含公司根成员), 后子部门
+	(node.members || []).forEach((m: any) => children.push({
+		id: `u${m.id}`,
+		rid: m.id,
+		dept_id: m.dept_id,
+		name: m.name,
+		username: m.username,
+		mobile: m.mobile,
+		is_active: m.is_active !== false,
+		type: 'member',
+		tier: roleToShort(m.tier),
+		tier_label: m.tier_label,
+		data_range: m.data_range,
+	}));
+	(node.children || []).forEach((c: any) => children.push(toTree(c)));
+	return {
+		id: `d${node.id}`,
+		rid: node.id,
+		name: node.name,
+		type: node.type || 'dept',
+		parent_id: node.parent || null,
+		children,
+	};
+};
+
+const roleToShort = (k: string) =>
+	(({ tenant_manager: 'manager', tenant_supervisor: 'supervisor', tenant_emp: 'staff' } as any)[k]) || '';
+
+const loadTree = async () => {
+	treeLoading.value = true;
+	try {
+		const res: any = await api.GetOrgChart(props.tenant?.id);
+		const tree = res.data;
+		treeData.value = tree ? [toTree({ ...tree, name: tree.name })] : [];
+		flattenDeptOptions();
+	} catch (e) {
+		console.error(e);
+	} finally {
+		treeLoading.value = false;
+	}
+};
+
+// ---- 树内联 CRUD ----
+const deptOptions = ref<any[]>([]);
+const flattenDeptOptions = () => {
+	const out: any[] = [];
+	const walk = (nodes: any[], depth: number) => {
+		(nodes || []).forEach((n: any) => {
+			if (n.type === 'dept') {
+				out.push({ id: n.rid, label: `${'\u2003'.repeat(depth)}${n.name}` });
+				walk(n.children, depth + 1);
+			} else {
+				// 公司根(tenant)等非部门节点: 继续下钻, 深度不变
+				walk(n.children, depth);
+			}
+		});
+	};
+	walk(treeData.value, 0);
+	deptOptions.value = out;
+};
+
+const deptDlgVisible = ref(false);
+const deptSaving = ref(false);
+const deptForm = ref<any>({ id: null, name: '', parent_id: null });
+
+const memberDlgVisible = ref(false);
+const memberSaving = ref(false);
+const memberForm = ref<any>({ id: null, name: '', username: '', mobile: '', dept_id: null, tier: 'staff', is_active: true });
+
+const openDeptDlg = (data: any) => {
+	deptForm.value = { id: data?.id ?? null, name: data?.name ?? '', parent_id: data?.parent_id ?? null };
+	deptDlgVisible.value = true;
+};
+const addTopDept = () => openDeptDlg({ id: null, name: '', parent_id: null });
+const addSubDept = (data: any) => openDeptDlg({ id: null, name: '', parent_id: data.rid });
+const editDept = (data: any) => openDeptDlg({ id: data.rid, name: data.name, parent_id: data.parent_id });
+
+const saveDept = async () => {
+	if (!deptForm.value.name.trim()) {
+		ElMessage.warning(t('message.pages.orgChart.deptNameRequired'));
+		return;
+	}
+	deptSaving.value = true;
+	try {
+		await api.OrgDeptSave(props.tenant?.id, {
+			id: deptForm.value.id,
+			name: deptForm.value.name,
+			parent_id: deptForm.value.parent_id || null,
+		});
+		ElMessage.success(t('message.pages.orgChart.saved'));
+		deptDlgVisible.value = false;
+		loadTree();
+	} catch (e) {
+		console.error(e);
+	} finally {
+		deptSaving.value = false;
+	}
+};
+
+const delDept = async (data: any) => {
+	await ElMessageBox.confirm(t('message.pages.orgChart.deleteDeptConfirm', { name: data.name }), t('message.pages.orgChart.deleteTitle'), { type: 'warning' });
+	await api.OrgDeptDelete(props.tenant?.id, data.rid);
+	ElMessage.success(t('message.pages.orgChart.deleted'));
+	loadTree();
+};
+
+const openMemberDlg = (data: any) => {
+	memberForm.value = {
+		id: data?.id ?? null,
+		name: data?.name ?? '',
+		username: data?.username ?? '',
+		mobile: data?.mobile ?? '',
+		dept_id: data?.dept_id ?? null,
+		tier: data?.tier ?? 'staff',
+		is_active: data?.is_active ?? true,
+	};
+	memberDlgVisible.value = true;
+	// 新增成员需要展示默认密码提示(与批量导入共用同一配置, 只拉一次)
+	if (!data?.id && !templateLoaded.value) {
+		templateLoaded.value = true;
+		loadTemplateMeta();
+	}
+};
+const addDeptMember = (data: any) => openMemberDlg({ id: null, name: '', username: '', mobile: '', dept_id: data.rid, tier: 'staff', is_active: true });
+const addTopMember = () => openMemberDlg({ id: null, name: '', username: '', mobile: '', dept_id: null, tier: 'staff', is_active: true });
+const editMember = (data: any) => openMemberDlg({ id: data.rid, name: data.name, username: data.username, mobile: data.mobile, dept_id: data.dept_id, tier: data.tier || 'staff', is_active: data.is_active });
+
+const saveMember = async () => {
+	const f = memberForm.value;
+	if (!f.name.trim()) {
+		ElMessage.warning(t('message.pages.orgChart.nameRequired'));
+		return;
+	}
+	if (!f.id && !f.username.trim()) {
+		ElMessage.warning(t('message.pages.orgChart.accountRequired'));
+		return;
+	}
+	if (!f.tier) {
+		ElMessage.warning(t('message.pages.orgChart.tierRequired'));
+		return;
+	}
+	memberSaving.value = true;
+	try {
+		const res: any = await api.OrgMemberSave(props.tenant?.id, {
+			id: f.id,
+			name: f.name,
+			username: f.username,
+			mobile: f.mobile,
+			dept_id: f.dept_id || null,
+			tier: f.tier,
+			is_active: f.is_active,
+		});
+		ElMessage.success(f.id ? t('message.pages.orgChart.saved') : t('message.pages.orgChart.memberAdded', { default_password: res.data?.default_password }));
+		memberDlgVisible.value = false;
+		loadTree();
+	} catch (e) {
+		console.error(e);
+	} finally {
+		memberSaving.value = false;
+	}
+};
+
+const delMember = async (data: any) => {
+	const uid = data?.rid ?? data?.id;
+	await ElMessageBox.confirm(t('message.pages.orgChart.deleteMemberConfirm', { name: data.name || data.username }), t('message.pages.orgChart.deleteTitle'), { type: 'warning' });
+	await api.OrgMemberDelete(props.tenant?.id, uid);
+	ElMessage.success(t('message.pages.orgChart.deleted'));
+	memberDlgVisible.value = false;
+	loadTree();
+};
+
+// 重置成员密码(超管专属): 下次登录强制改密
+const resetMemberPwd = async (data: any) => {
+	try {
+		const uid = data?.rid ?? data?.id;
+		const { value } = await ElMessageBox.prompt(
+			t('message.pages.orgChart.resetPwdPrompt', { name: data.name || data.username }),
+			t('message.pages.orgChart.resetPwdTitle'),
+			{ inputType: 'password', inputPlaceholder: t('message.pages.orgChart.newPassword'), confirmButtonText: t('message.pages.orgChart.confirmReset'), cancelButtonText: t('message.pages.orgChart.cancel') }
+		);
+		if (!value || value.length < 8 || !/[a-zA-Z]/.test(value) || !/[0-9]/.test(value)) {
+			ElMessage.warning(t('message.pages.orgChart.pwdRule'));
+			return;
+		}
+		const res: any = await api.OrgMemberResetPwd(uid, value);
+		if (res.code === 2000) ElMessage.success(t('message.pages.orgChart.resetDone'));
+	} catch (e) {
+		/* 用户取消 */
+	}
+};
+
+// 清空组织架构(删除该租户全部部门与成员, 保留租户本身, 便于重建导入)
+const clearOrg = async (data: any) => {
+	await ElMessageBox.confirm(
+		t('message.pages.orgChart.clearOrgConfirm', { name: data.name }),
+		t('message.pages.orgChart.dangerConfirm'),
+		{ type: 'warning', confirmButtonText: t('message.pages.orgChart.confirmClear'), cancelButtonText: t('message.pages.orgChart.cancel') }
+	);
+	const res: any = await api.OrgChartClear(props.tenant?.id);
+	ElMessage.success(res.msg || t('message.pages.orgChart.orgCleared'));
+	loadTree();
+};
+
+// ---- 修改公司名称(租户经理/超管) ----
+const nameDlgVisible = ref(false);
+const nameSaving = ref(false);
+const nameForm = ref<{ name: string }>({ name: '' });
+
+const editCompanyName = (data: any) => {
+	nameForm.value = { name: data?.name || '' };
+	nameDlgVisible.value = true;
+};
+
+const saveCompanyName = async () => {
+	const name = (nameForm.value.name || '').trim();
+	if (!name) {
+		ElMessage.warning(t('message.pages.orgChart.deptNameRequired'));
+		return;
+	}
+	nameSaving.value = true;
+	try {
+		const res: any = await api.UpdateTenantName(props.tenant?.id, name);
+		if (res.code === 2000) {
+			ElMessage.success(t('message.pages.orgChart.companyNameUpdated'));
+			nameDlgVisible.value = false;
+			loadTree();
+			emit('imported');
+		} else {
+			ElMessage.error(res.msg || t('message.pages.orgChart.saveFail'));
+		}
+	} catch (e) {
+		console.error(e);
+		ElMessage.error(t('message.pages.orgChart.saveFail'));
+	} finally {
+		nameSaving.value = false;
+	}
+};
+</script>
+
+<style scoped lang="scss">
+.org-inline {
+	.tree-box {
+		max-height: 520px;
+	}
+}
+
+.import-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 10px;
+	flex-wrap: wrap;
+
+	.file-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 6px 10px;
+		background: rgba(103, 194, 58, 0.12);
+		border: 1px solid rgba(103, 194, 58, 0.35);
+		border-radius: 6px;
+		color: #93c989;
+		font-size: 13px;
+		max-width: 220px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.toolbar-tip {
+		font-size: 12px;
+		color: var(--cn-muted);
+		margin-bottom: 14px;
+
+		.acc-pwd {
+			color: #e6a23c;
+			font-weight: 600;
+			background: rgba(230, 162, 60, 0.12);
+			border: 1px dashed rgba(230, 162, 60, 0.45);
+			border-radius: 4px;
+			padding: 2px 6px;
+		}
+	}
+}
+
+.form-tip {
+	width: 100%;
+	font-size: 11px;
+	color: var(--cn-muted);
+	margin-top: 4px;
+	text-align: right;
+}
+
+.form-tip.account-tip {
+	font-size: 11px;
+}
+
+.member-pwd-tip {
+	width: 100%;
+	margin-top: 6px;
+	text-align: left;
+	font-size: 12px;
+	font-weight: 600;
+	color: #e6a23c;
+	background: rgba(230, 162, 60, 0.12);
+	border: 1px dashed rgba(230, 162, 60, 0.45);
+	border-radius: 6px;
+	padding: 6px 10px;
+}
+
+.stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+	gap: 10px;
+	margin-bottom: 14px;
+
+	.stat {
+		background: #1a1a1c;
+		border: 1px solid #2a2a2a;
+		border-radius: 8px;
+		padding: 10px;
+		text-align: center;
+
+		.n {
+			display: block;
+			font-size: 22px;
+			font-weight: 600;
+			color: #eaeaea;
+		}
+
+		.l {
+			display: block;
+			font-size: 12px;
+			color: #b1b4b8;
+			margin-top: 2px;
+		}
+
+		&.bad .n {
+			color: #f56c6c;
+		}
+
+		&.warn .n {
+			color: #e6a23c;
+		}
+	}
+}
+
+.preview-table {
+	border: 1px solid #2a2a2a;
+	border-radius: 8px;
+	overflow: hidden;
+
+	:deep(.el-table) {
+		--el-table-border-color: #2a2a2a;
+		--el-table-bg-color: transparent;
+		--el-table-tr-bg-color: transparent;
+		--el-table-header-bg-color: transparent;
+		--el-table-row-hover-bg-color: rgba(255, 255, 255, 0.04);
+		--el-table-text-color: #eaeaea;
+		--el-table-header-text-color: #b1b4b8;
+
+		background: transparent;
+
+		.el-table__cell {
+			color: #eaeaea;
+		}
+	}
+
+	.ok {
+		color: #67c23a;
+	}
+
+	.warn {
+		color: #e6a23c;
+	}
+
+	.muted {
+		color: #8f9297;
+	}
+
+	.err {
+		color: #f56c6c;
+	}
+}
+
+.acc-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	line-height: 1.3;
+
+	.acc-name {
+		color: #eaeaea;
+		white-space: nowrap;
+	}
+
+	.acc-hint {
+		color: #e6a23c;
+		font-size: 11px;
+		font-weight: 600;
+		background: rgba(230, 162, 60, 0.12);
+		border: 1px dashed rgba(230, 162, 60, 0.45);
+		border-radius: 4px;
+		padding: 2px 6px;
+	}
+}
+
+.err-box {
+	margin-top: 12px;
+	background: rgba(245, 108, 108, 0.08);
+	border: 1px solid rgba(245, 108, 108, 0.3);
+	border-radius: 8px;
+	padding: 10px 12px;
+	max-height: 120px;
+	overflow: auto;
+
+	.err-line {
+		color: #f56c6c;
+		font-size: 13px;
+		line-height: 1.8;
+	}
+}
+
+.commit-bar {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 16px;
+	margin-top: 16px;
+
+	.commit-tip {
+		font-size: 13px;
+		color: #b1b4b8;
+	}
+}
+
+.tree-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 14px;
+
+	.toolbar-grow {
+		flex: 1;
+	}
+
+	.hint {
+		color: #b1b4b8;
+		font-size: 13px;
+	}
+
+	.soft-btn {
+		background: rgba(64, 158, 255, 0.14);
+		border-color: rgba(64, 158, 255, 0.3);
+		color: #9ec9ff;
+		font-weight: 400;
+		flex-shrink: 0;
+
+		&:hover,
+		&:focus {
+			background: rgba(64, 158, 255, 0.24);
+			border-color: rgba(64, 158, 255, 0.45);
+			color: #bcd9ff;
+		}
+	}
+}
+
+.tree-box {
+	background: #1a1a1c;
+	border: 1px solid #2a2a2a;
+	border-radius: 8px;
+	padding: 14px;
+	max-height: 420px;
+	overflow: auto;
+
+	:deep(.el-tree) {
+		--el-tree-node-content-height: 32px;
+		background: transparent;
+		color: #eaeaea;
+
+		.el-tree-node__content {
+			background: transparent;
+			width: 100%;
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.04);
+			}
+		}
+
+		.el-tree-node {
+			min-width: 100%;
+		}
+	}
+
+	.tree-node {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		width: 100%;
+
+		.dept-ico {
+			color: #e6a23c;
+		}
+
+		.user-ico {
+			color: #409eff;
+		}
+
+		.tenant-ico {
+			color: #b07be6;
+		}
+
+		.t-name {
+			color: #eaeaea;
+			font-size: 14px;
+		}
+
+		.t-username {
+			color: #b1b4b8;
+			font-size: 12px;
+		}
+
+		.t-mobile {
+			color: #b1b4b8;
+			font-size: 12px;
+		}
+
+		.range-tag {
+			margin-left: 6px;
+		}
+
+		.node-actions {
+			margin-left: auto;
+			opacity: 0;
+			transition: opacity 0.15s;
+			display: flex;
+			align-items: center;
+			gap: 2px;
+
+			.el-button {
+				padding: 2px 6px;
+				font-size: 12px;
+			}
+
+			.el-button--primary.is-link {
+				color: #66b1ff;
+			}
+
+			.el-button--danger.is-link {
+				color: #f56c6c;
+			}
+		}
+
+		&:hover .node-actions {
+			opacity: 1;
+		}
+	}
+}
+
+.empty {
+	text-align: center;
+	color: #b1b4b8;
+	padding: 60px 0;
+
+	.empty-tip {
+		margin-bottom: 16px;
+		font-size: 14px;
+		color: var(--cn-text, #eaeaea);
+	}
+}
+
+/* 柔和主按钮 */
+:deep(.el-button--primary) {
+	background: rgba(64, 158, 255, 0.2);
+	border-color: rgba(64, 158, 255, 0.35);
+	color: #9ec9ff;
+
+	&:hover,
+	&:focus {
+		background: rgba(64, 158, 255, 0.3);
+		border-color: rgba(64, 158, 255, 0.5);
+		color: #bcd9ff;
+	}
+}
+
+/* 弹窗底栏: 删除靠左, 保存/取消靠右(与租户/LineBot 管理一致) */
+:deep(.el-dialog__footer) {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.footer-spacer {
+	flex: 1;
+}
+
+/* 「删除」按钮: 固定深色底+红字, 不随 light/dark 变白(与租户/LineBot 一致) */
+.footer-del {
+	background: rgba(245, 108, 108, 0.12) !important;
+	border-color: rgba(245, 108, 108, 0.5) !important;
+	color: #f56c6c !important;
+
+	&:hover,
+	&:focus {
+		background: rgba(245, 108, 108, 0.2) !important;
+		border-color: rgba(245, 108, 108, 0.7) !important;
+		color: #f87171 !important;
+	}
+}
+</style>
+
+<style lang="scss">
+// 成员/部门弹窗使用 append-to-body, 会脱离 scoped 作用域, 需全局样式兜底
+// 弹窗底栏: 删除靠左, 保存/取消靠右(与租户/LineBot 管理一致)
+.org-dialog,
+.el-dialog .el-dialog__footer {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.org-dialog .footer-spacer {
+	flex: 1;
+}
+</style>
