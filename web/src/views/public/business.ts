@@ -14,7 +14,7 @@ export const BUSINESS = {
 
 export const PLAN = {
 	name: 'proNotify Annual Plan',
-	priceTHB: 2000,
+	priceTHB: 3000,
 	billingDays: 365,
 	currency: 'THB',
 	autoRenew: false,
