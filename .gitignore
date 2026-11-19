@@ -85,6 +85,9 @@ test-results/
 # 会话记录可能包含口令/密钥, 不提交
 MEMORY.md
 refer-memory/
+MEMORY_1st.md
+MEMORY_2nd.md
 
 # 含密钥的服务端配置
 /backend/conf/env_server.py
+/backend/conf/env.py

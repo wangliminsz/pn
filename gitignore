@@ -1,0 +1,93 @@
+/backend/venv
+/backend/.idea
+.idea
+
+.history/
+.vscode/
+web/package-lock.json
+
+.playwright-mcp/
+/backend/db.sqlite3-wal
+/backend/db.sqlite3-shm
+web/test-results/
+
+# Superpowers planning docs
+docs/superpowers/
+
+# Local configuration files (not tracked in git)
+/backend/conf/env.py
+/backend/conf/gcal_service_account.json
+
+# 临时脚本/截图脚本(内含测试账号密码, 勿提交)
+/web/shot_gcal.mjs
+
+# 密钥/证书类文件, 一律不提交
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*credentials*.json
+*secret*.json
+
+# opencode 本地配置(含模型 apiKey), 防误提交
+opencode.json
+
+# 环境变量文件(仅本地; 示例文件用 .env.example 提交)
+.env
+.env.local
+.env.local_*
+.env.*.local
+!.env.example
+!.env.*.example
+
+# Python 虚拟环境 (根目录及任意层级的 venv)
+venv/
+ENV/
+env/
+
+# Node 依赖与构建产物
+node_modules/
+dist/
+web/public/version-build
+
+# Python 缓存/字节码
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 本地数据库与日志
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+db.sqlite3
+*.log
+/backend/logs/
+
+# 运行时生成/私有数据(报告、抓取缓存、RAG 索引、浏览器资料等)
+/backend/card_data/
+/backend/proposal_data/
+/backend/docai_data/
+/backend/rag_data/
+/backend/news_data/
+/backend/fund_reports/
+/backend/staticfiles/
+/backend/media/
+*.zip
+
+# Playwright / 测试产物
+playwright-report/
+test-results/
+.webassets-cache
+
+# 会话记录可能包含口令/密钥, 不提交
+MEMORY.md
+refer-memory/
+MEMORY_1st.md
+MEMORY_2nd.md
+
+# 含密钥的服务端配置
+/backend/conf/env_server.py
+/backend/conf/env.py
