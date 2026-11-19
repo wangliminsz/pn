@@ -2,14 +2,14 @@ import { request } from '/@/utils/service';
 
 export const BUSINESS = {
 	productName: 'proNotify',
-	legalName: '[Your registered company name]',
-	contactName: '[Contact person]',
-	address: '[Registered business address, Thailand]',
-	phone: '[+66 XX XXX XXXX]',
-	email: 'support@pronotify.site',
+	legalName: 'Ant Global Property Co., Ltd.',
+	contactName: 'Daisy Chan',
+	address: 'Interchange 21 Building, Asoke, Bangkok 10110',
+	phone: '+66 0800252616',
+	email: 'antglobalproperty3@gmail.com',
 	website: 'https://pronotify.site',
 	hours: 'Monday–Friday, 09:00–18:00 (ICT)',
-	taxId: '[Thai tax ID / company registration number]'
+	taxId: '0105561199314'
 };
 
 export const PLAN = {
