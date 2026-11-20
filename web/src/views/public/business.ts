@@ -5,7 +5,7 @@ export const BUSINESS = {
 	legalName: 'Ant Global Property Co., Ltd.',
 	contactName: 'Daisy Chan',
 	address: 'Interchange 21 Building, Asoke, Bangkok 10110',
-	phone: '+66 0800252616',
+	phone: '+66 66959636888',
 	email: 'antglobalproperty3@gmail.com',
 	website: 'https://pronotify.site',
 	hours: 'Monday–Friday, 09:00–18:00 (ICT)',
