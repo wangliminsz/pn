@@ -12,21 +12,31 @@
 					<template #prefix><el-icon class="search-ico" @click="onSearch" :title="$t('message.pages.property.toolbar.search')"><ele-Search /></el-icon></template>
 				</el-input>
 				<el-radio-group v-model="viewMode" class="view-switch" size="default">
-					<el-radio-button value="card"><el-icon style="margin-right:4px"><ele-Grid /></el-icon>{{ $t('message.pages.property.toolbar.card') }}</el-radio-button>
-					<el-radio-button value="list"><el-icon style="margin-right:4px"><ele-Tickets /></el-icon>{{ $t('message.pages.property.toolbar.list') }}</el-radio-button>
+					<el-tooltip :content="$t('message.pages.property.toolbar.card')" placement="bottom">
+						<el-radio-button value="card"><el-icon><ele-Grid /></el-icon></el-radio-button>
+					</el-tooltip>
+					<el-tooltip :content="$t('message.pages.property.toolbar.list')" placement="bottom">
+						<el-radio-button value="list"><el-icon><ele-Tickets /></el-icon></el-radio-button>
+					</el-tooltip>
 				</el-radio-group>
 				<el-button type="primary" @click="openAdd">
 					<el-icon style="margin-right: 4px"><ele-Plus /></el-icon>{{ $t('message.pages.property.toolbar.add') }}
 				</el-button>
-				<el-button class="soft-ai" @click="aiVisible = true">
-					<el-icon style="margin-right: 4px"><ele-MagicStick /></el-icon>{{ $t('message.pages.property.toolbar.ai') }}
-				</el-button>
-				<el-button class="soft-primary" @click="importVisible = true">
-					<el-icon style="margin-right: 4px"><ele-Upload /></el-icon>{{ $t('message.pages.property.toolbar.import') }}
-				</el-button>
-				<el-button class="soft-primary" :loading="exporting" :disabled="total === 0" @click="onExport">
-					<el-icon style="margin-right: 4px"><ele-Download /></el-icon>{{ $t('message.pages.property.toolbar.export') }}
-				</el-button>
+				<el-tooltip :content="$t('message.pages.property.toolbar.ai')" placement="bottom">
+					<el-button class="soft-ai icon-btn" @click="aiVisible = true">
+						<el-icon><ele-MagicStick /></el-icon>
+					</el-button>
+				</el-tooltip>
+				<el-tooltip :content="$t('message.pages.property.toolbar.import')" placement="bottom">
+					<el-button class="soft-primary icon-btn" @click="importVisible = true">
+						<el-icon><ele-Upload /></el-icon>
+					</el-button>
+				</el-tooltip>
+				<el-tooltip :content="$t('message.pages.property.toolbar.export')" placement="bottom">
+					<el-button class="soft-primary icon-btn" :loading="exporting" :disabled="total === 0" @click="onExport">
+						<el-icon v-if="!exporting"><ele-Download /></el-icon>
+					</el-button>
+				</el-tooltip>
 			</div>
 		</div>
 
@@ -58,7 +68,7 @@
 				
 				<div class="row divider"></div>
 				<div class="row"><span class="k">{{ $t('message.pages.property.card.lineBot') }}</span><span class="v tail">{{ p.line_bot_name || '—' }}</span></div>
-				<div class="row"><span class="k">{{ $t('message.pages.property.card.groupId') }}</span><span class="v tail gid" :title="p.group_id">{{ p.group_id || '—' }}</span></div>
+				<div class="row"><span class="k">{{ $t('message.pages.property.card.groupId') }}</span><span class="v tail gid" :title="p.group_name || p.group_id">{{ p.group_name || p.group_id || '—' }}</span></div>
 				<div class="row divider"></div>
 
 				<div class="row"><span class="k">{{ $t('message.pages.property.card.memo') }}</span><span class="v memo" :title="p.memo">{{ shortMemo(p.memo) }}</span></div>
@@ -109,8 +119,20 @@
 					<template #default="{ row }">{{ row.line_bot_name || '—' }}</template>
 				</el-table-column>
 				<el-table-column :label="$t('message.pages.property.table.groupId')" min-width="210">
+					<template #header>
+						<span class="gid-head">
+							<span>{{ $t('message.pages.property.table.groupId') }}</span>
+							<el-tooltip :content="$t('message.pages.property.table.refreshGroupNames')" placement="top">
+								<el-icon class="gid-refresh" :class="{ spinning: refreshingGroups }" @click.stop="refreshGroupNames">
+									<ele-Refresh />
+								</el-icon>
+							</el-tooltip>
+						</span>
+					</template>
 					<template #default="{ row }">
-						<span class="lt-gid" :title="row.group_id">{{ row.group_id || '—' }}</span>
+						<span v-if="row.group_name" class="lt-gname" :title="row.group_name">{{ row.group_name }}</span>
+						<span v-else class="lt-gid" :class="{ 'lt-gid-bad': row._gid_checked && row.group_id }"
+							:title="row._gid_checked && row.group_id ? $t('message.pages.property.table.invalidGroupId') : row.group_id">{{ row.group_id || '—' }}</span>
 					</template>
 				</el-table-column>
 				<el-table-column :label="$t('message.pages.property.table.attachments')" min-width="68" align="center">
@@ -388,7 +410,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useUserInfo } from '/@/stores/userInfo';
-import { apiPrefix, GetList, AddObj, UpdateObj, DelObj, ListAttachments, UploadAttachments, DelAttachment, GetOwnerLogs, ListReminderRules, DelReminderRule } from './api';
+import { apiPrefix, GetList, AddObj, UpdateObj, DelObj, ListAttachments, UploadAttachments, DelAttachment, GetOwnerLogs, ListReminderRules, DelReminderRule, RefreshGroupName } from './api';
 import PropertyImportDialog from './components/PropertyImportDialog.vue';
 import ReminderRuleDialog from './components/ReminderRuleDialog.vue';
 import AIAssistDialog from './components/AIAssistDialog.vue';
@@ -502,6 +524,52 @@ const load = async () => {
 	} finally {
 		loading.value = false;
 	}
+};
+
+// 仅刷新当前页记录的群名称(逐条打 LINE, 不触发翻页/其他页请求)
+const refreshingGroups = ref(false);
+const refreshGroupNames = async () => {
+	if (refreshingGroups.value) return;
+	const rows = list.value.filter((r: any) => r.group_id);
+	if (rows.length === 0) {
+		ElMessage.warning(t('message.pages.property.message.groupRefreshNone'));
+		return;
+	}
+	refreshingGroups.value = true;
+	let ok = 0;
+	let fail = 0;
+	const refreshOne = async (r: any) => {
+		try {
+			const res: any = await RefreshGroupName(r.id);
+			const name = res?.data?.group_name;
+			if (res?.code === 2000 && name) {
+				r.group_name = name;
+				ok += 1;
+			} else {
+				r.group_name = '';
+				fail += 1;
+			}
+		} catch (e) {
+			r.group_name = '';
+			fail += 1;
+		} finally {
+			r._gid_checked = true;
+		}
+	};
+	// 小并发(5)处理, 避免一次推送过多 LINE 请求触发限流
+	let cursor = 0;
+	const worker = async () => {
+		while (cursor < rows.length) {
+			const r = rows[cursor];
+			cursor += 1;
+			await refreshOne(r);
+		}
+	};
+	await Promise.all(Array.from({ length: Math.min(5, rows.length) }, () => worker()));
+	refreshingGroups.value = false;
+	if (fail === 0) ElMessage.success(t('message.pages.property.message.groupRefreshDone', { ok }));
+	else if (ok === 0) ElMessage.warning(t('message.pages.property.message.groupRefreshFailed'));
+	else ElMessage.warning(t('message.pages.property.message.groupRefreshPartial', { ok, fail }));
 };
 
 const loadOptions = async () => {
@@ -759,7 +827,8 @@ onMounted(() => {
 		.left .title { font-size: 18px; font-weight: 600; color: #f4f4f5; }
 		.left .count { margin-left: 8px; font-size: 13px; color: #b1b4b8; }
 		.right { display: flex; gap: 10px; align-items: center; }
-		.search { width: 260px; }
+		.search { width: 240px; }
+		.icon-btn { padding-left: 12px; padding-right: 12px; }
 		.search-ico {
 			cursor: pointer;
 			color: #b1b4b8;
@@ -913,6 +982,10 @@ onMounted(() => {
 			border-color: #333;
 			color: #b1b4b8;
 			font-weight: 400;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 8px 12px;
 		}
 		:deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
 			background: rgba(64, 158, 255, 0.2);
@@ -969,6 +1042,27 @@ onMounted(() => {
 			white-space: normal;
 			vertical-align: middle;
 			line-height: 1.4;
+		}
+		.lt-gid-bad { color: #ffa940; }
+		.lt-gname {
+			display: inline-block;
+			max-width: 100%;
+			color: #d8dade;
+			vertical-align: middle;
+			word-break: break-word;
+			line-height: 1.4;
+		}
+		.gid-head {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+		}
+		.gid-refresh {
+			cursor: pointer;
+			color: #94979c;
+			transition: color 0.2s;
+			&:hover { color: #409eff; }
+			&.spinning { animation: gid-spin 0.8s linear infinite; }
 		}
 		.lt-memo {
 			display: inline-block;
@@ -1084,6 +1178,11 @@ onMounted(() => {
 				color: #f87171 !important;
 			}
 		}
+	}
+
+	@keyframes gid-spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
 	}
 </style>
 <style lang="scss">

@@ -42,6 +42,15 @@ export function DelObj(id: DelReq) {
 	});
 }
 
+// 强制刷新某房源的 Line 群名称(绕过缓存, 结果回写缓存)
+export function RefreshGroupName(property_id: number) {
+	return request({
+		url: '/api/tenant/workspace/refresh_group_name/',
+		method: 'post',
+		data: { property_id },
+	});
+}
+
 // 房源负责人变更记录
 export function GetOwnerLogs(id: number) {
 	return request({

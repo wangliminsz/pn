@@ -8,7 +8,7 @@ export default {
                     delete: '删除',
                 },
                 toolbar: {
-                    title: '房源管理',
+                    title: '房源',
                     count: '共 {total} 间',
                     searchPlaceholder: '搜索名称 / 群ID / 负责人',
                     search: '搜索',
@@ -57,6 +57,8 @@ export default {
                     remind: '提醒',
                     lineBot: 'Line Bot',
                     groupId: 'Group ID',
+                    refreshGroupNames: '刷新本页群名称',
+                    invalidGroupId: '未找到该群 — 请检查 Group ID / Bot',
                     attachments: '附件',
                     rules: '规则',
                     columns: {
@@ -119,6 +121,10 @@ export default {
                     deleted: '已删除',
                     deleteConfirm: '确定删除「{name}」吗？',
                     deleteTitle: '删除提示',
+                    groupRefreshDone: '群名称已刷新（{ok} 个）',
+                    groupRefreshPartial: '已刷新 {ok} 个，{fail} 个无法解析（请检查群ID / Bot）',
+                    groupRefreshFailed: '无法解析群名称（请检查 Bot 权限 / 网络）',
+                    groupRefreshNone: '本页没有 Group ID',
                 },
                 attachments: {
                     title: '附件管理',

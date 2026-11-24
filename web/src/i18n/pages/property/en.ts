@@ -3,7 +3,7 @@ export default {
         pages: {
             property: {
                 toolbar: {
-                    title: 'Property Management',
+                    title: 'Property',
                     count: '{total} rooms',
                     searchPlaceholder: 'Search name / Group ID / Owner',
                     search: 'Search',
@@ -53,6 +53,8 @@ export default {
                     remind: 'Reminder',
                     lineBot: 'Line Bot',
                     groupId: 'Group ID',
+                    refreshGroupNames: 'Refresh group names for this page',
+                    invalidGroupId: 'Group not found — check the Group ID / Bot',
                     attachments: 'Files',
                     rules: 'Rules',
                     columns: {
@@ -115,6 +117,10 @@ export default {
                     deleted: 'Deleted',
                     deleteConfirm: 'Delete "{name}"?',
                     deleteTitle: 'Delete Confirm',
+                    groupRefreshDone: 'Group names refreshed ({ok})',
+                    groupRefreshPartial: 'Refreshed {ok}, {fail} could not be resolved (check the group ID / bot)',
+                    groupRefreshFailed: 'Could not resolve group names (check the bot permission / network)',
+                    groupRefreshNone: 'No Group ID on this page',
                 },
                 attachments: {
                     title: 'Attachments',
